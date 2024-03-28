@@ -1,0 +1,19 @@
+.mouth-image {
+    position: relative;
+    display: inline-block;
+}
+
+.mouth-image img {
+    width: 100%;
+    max-width: 400px;
+    height: auto;
+}
+
+.canker-sore {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background-color: red;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+}
