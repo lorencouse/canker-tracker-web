@@ -1,12 +1,19 @@
 import React, { useState } from "react";
+import { useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import './MouthImage.css';
-import mouthDiagram from '../assets/images/mouthDiagramNoLabels.png';
+
+
 
 
 const MouthImage: React.FC = () => {
+
+    const navigate = useNavigate();
     const [sorePosition, setSorePosition] = useState<{ x: number; y: number } | null>(null);
     const [soreSize, setSoreSize] = useState(3);
     const [sorePainLevel, setSorePainLevel] = useState(3);
+    const { zone } = useParams<{ zone: string}>();
+    const imageUrl = `../assets/images/${zone}`
 
 
     const handleImageClick = (event: React.MouseEvent<HTMLImageElement, MouseEvent>) => {
@@ -34,8 +41,8 @@ const MouthImage: React.FC = () => {
     };
 
     return (
-        <div className="mouth-image-container" onContextMenu={handleContextMenu}>
-            <img src={mouthDiagram} alt="Mouth Diagram" onClick={handleImageClick}/>
+        <div className="mouth-image-container" >
+            <img src = {imageUrl} alt="Mouth Diagram" onClick={handleImageClick} onContextMenu={handleContextMenu}/>
             {sorePosition && (
             
             <div className="canker-sore" 
@@ -68,11 +75,11 @@ const MouthImage: React.FC = () => {
         </div>
 
         <div className="navigation-buttons">
-            <button>
+            <button onClick={ () => navigate("/")}>
                 Finish
             </button>
 
-            <button>
+            <button onClick={ () => navigate("/select-zone")}>
                 Add More
             </button>
 
