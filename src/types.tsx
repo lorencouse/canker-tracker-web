@@ -1,10 +1,10 @@
 export interface CankerSore {
     id: string;
-    lastUpdated: [Date];
+    lastUpdated: Date[];
     numberOfDays: number;
     locationImage: string;
-    soreSize: [number];
-    painLevel: [number];
+    soreSize: number[];
+    painLevel: number[];
     xCoordinateZoomed?: number;
     yCoordinateZoomed?: number;
     xCoordinateScaled?: number;
@@ -26,7 +26,6 @@ export interface DailyLog {
 }
 
 export interface ImageScale {
-    viewName: string
     scaleX: number
     scaleY: number
     xOffset: number

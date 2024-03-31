@@ -1,9 +1,11 @@
 import React, { useState } from "react";
-import { useParams } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom'; // Combine imports
 import './MouthImage.css';
-
-
+import { CankerSore } from "../types";
+import { v4 as uuidv4 } from 'uuid';
+import { calculateScaledXY } from "../utilities/CankerSoreManager";
+import { db } from '../firebaseConfig';
+import { addCankerSoreToFirestore } from '../services/firestoreService'; 
 
 
 const MouthImage: React.FC = () => {
@@ -40,6 +42,32 @@ const MouthImage: React.FC = () => {
         return `rgb(${value}, ${255 - value}, ${255 - value})`;
     };
 
+    
+    async function saveCankerSore() {
+
+        if (!sorePosition || zone === undefined) return;
+
+        const scaledXY = calculateScaledXY(sorePosition?.x, sorePosition?.y, zone) 
+
+        const newSore: CankerSore = {
+            id: uuidv4(),
+            lastUpdated: [new Date()],
+            numberOfDays: 5,
+            locationImage: zone,
+            soreSize: [soreSize],
+            painLevel: [sorePainLevel], 
+            xCoordinateZoomed: sorePosition.x, 
+            yCoordinateZoomed: sorePosition.y,
+            xCoordinateScaled: scaledXY[0],
+            yCoordinateScaled: scaledXY[1],
+        }
+
+        await addCankerSoreToFirestore(newSore);
+
+    }
+
+
+
     return (
         <div className="mouth-image-container" >
             <img src = {imageUrl} alt="Mouth Diagram" onClick={handleImageClick} onContextMenu={handleContextMenu}/>
@@ -75,11 +103,17 @@ const MouthImage: React.FC = () => {
         </div>
 
         <div className="navigation-buttons">
-            <button onClick={ () => navigate("/")}>
+            <button onClick={ () =>  {
+            saveCankerSore()
+            navigate("/")
+            }}>
                 Finish
             </button>
 
-            <button onClick={ () => navigate("/select-zone")}>
+            <button onClick={ () => {
+            saveCankerSore()
+            navigate("/select-zone")
+            } }>
                 Add More
             </button>
 

@@ -30,8 +30,8 @@ const MouthZoneSelector: React.FC = () => {
             zoneName = "lowerGums";
         }
     }
-    const imageName = `${zoneName}.png`
-    navigate(`/mouth-zone/${imageName}`)
+
+    navigate(`/mouth-zone/${zoneName}.png`)
 
 
     }
