@@ -10,23 +10,49 @@ export const saveData = async (collectionName: string, data: Record<string, any>
     return docRef.id; // Return the document ID
   } catch (e) {
     console.error("Error adding document: ", e);
-    throw e; // Rethrow the error for handling elsewhere
+    throw e; 
   }
 };
 
-export const getAllData = async (collectionName: string) => {
+export const loadData = async (collectionName: string) => {
   try {
     const querySnapshot = await getDocs(collection(db, collectionName));
     return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
   } catch (e) {
     console.error("Error fetching documents: ", e);
-    throw e; // Rethrow the error for handling elsewhere
+    throw e; 
   }
 };
 
-export const addCankerSoreToFirestore = async (cankerSore: CankerSore) => {
+export const loadAllCankerSores = async (): Promise<CankerSore[]> => {
+    const cankerSoreCollectionRef = collection(db, 'cankerSores');
+    const querySnapshot = await getDocs(cankerSoreCollectionRef);
+
+    const cankerSores: CankerSore[] = querySnapshot.docs.map(doc => {
+        const data = doc.data();
+
+        // Convert Firestore Timestamps to Date objects, if necessary
+        const lastUpdated = data.lastUpdated?.map((timestamp: { toDate: () => Date }) => timestamp.toDate()) || [];
+
+        return {
+            id: doc.id,
+            lastUpdated,
+            numberOfDays: data.numberOfDays,
+            locationImage: data.locationImage,
+            soreSize: data.soreSize,
+            painLevel: data.painLevel,
+            xCoordinateZoomed: data.xCoordinateZoomed,
+            yCoordinateZoomed: data.yCoordinateZoomed,
+            xCoordinateScaled: data.xCoordinateScaled,
+            yCoordinateScaled: data.yCoordinateScaled,
+        };
+    });
+
+    return cankerSores;
+};
+
+export const saveSore = async (cankerSore: CankerSore) => {
   try {
-    // Correctly use Firestore v9 modular syntax
     const cankerSoreRef = doc(collection(db, "cankerSores"), cankerSore.id);
     await setDoc(cankerSoreRef, cankerSore);
     console.log("Document successfully written!");

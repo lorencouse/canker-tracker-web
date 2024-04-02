@@ -5,7 +5,9 @@ import { CankerSore } from "../types";
 import { v4 as uuidv4 } from 'uuid';
 import { calculateScaledXY } from "../utilities/CankerSoreManager";
 import { db } from '../firebaseConfig';
-import { addCankerSoreToFirestore } from '../services/firestoreService'; 
+import { saveSore } from '../services/firestoreService'; 
+import Slider from "./Slider";
+import SoreCircle from "./SoreCircle";
 
 
 const MouthImage: React.FC = () => {
@@ -13,7 +15,7 @@ const MouthImage: React.FC = () => {
     const navigate = useNavigate();
     const [sorePosition, setSorePosition] = useState<{ x: number; y: number } | null>(null);
     const [soreSize, setSoreSize] = useState(3);
-    const [sorePainLevel, setSorePainLevel] = useState(3);
+    const [painLevel, setSorePainLevel] = useState(3);
     const { zone } = useParams<{ zone: string}>();
     const imageUrl = `../assets/images/${zone}`
 
@@ -37,13 +39,8 @@ const MouthImage: React.FC = () => {
         setSorePainLevel(parseInt(event.target.value, 10));
     }
 
-    const getColor = (step: number) => {
-        const value = step * 28;
-        return `rgb(${value}, ${255 - value}, ${255 - value})`;
-    };
-
     
-    async function saveCankerSore() {
+    async function buildAndSaveSore() {
 
         if (!sorePosition || zone === undefined) return;
 
@@ -55,14 +52,14 @@ const MouthImage: React.FC = () => {
             numberOfDays: 5,
             locationImage: zone,
             soreSize: [soreSize],
-            painLevel: [sorePainLevel], 
+            painLevel: [painLevel], 
             xCoordinateZoomed: sorePosition.x, 
             yCoordinateZoomed: sorePosition.y,
             xCoordinateScaled: scaledXY[0],
             yCoordinateScaled: scaledXY[1],
         }
 
-        await addCankerSoreToFirestore(newSore);
+        await saveSore(newSore);
 
     }
 
@@ -72,46 +69,30 @@ const MouthImage: React.FC = () => {
         <div className="mouth-image-container" >
             <img src = {imageUrl} alt="Mouth Diagram" onClick={handleImageClick} onContextMenu={handleContextMenu}/>
             {sorePosition && (
+
+            <SoreCircle id="" x={sorePosition.x} y={sorePosition.y} size={soreSize} pain={painLevel} />
             
-            <div className="canker-sore" 
-            style={{
-            left: sorePosition.x, 
-            top: sorePosition.y, 
-            width: `${soreSize}px`,
-            height: `${soreSize}px`,
-            backgroundColor: getColor(sorePainLevel),
-            }}></div>
             )}
 
 
         <div className="sliders">
-            <div className="slider-container">
-            <label>
-                Sore Size: {soreSize} mm 
-                <input type="range" className="slider" min="1" max="20" value={soreSize} onChange={handleSizeChange} />
 
-            </label>
-            </div>
-            
-            <div className="slider-container">
-            <label>
-                Pain Level: {sorePainLevel}
-                <input type="range" className="slider" min="1" max="10" value={sorePainLevel} onChange={handlePainLevelChange} />
-            </label>
-            </div>
+            <Slider label="Size (mm)" min={1} max={20} value={soreSize} onChange={handleSizeChange} />
+
+            <Slider label="Pain" min={1} max={10} value={painLevel} onChange={handlePainLevelChange} />
 
         </div>
 
         <div className="navigation-buttons">
             <button onClick={ () =>  {
-            saveCankerSore()
+            buildAndSaveSore()
             navigate("/")
             }}>
                 Finish
             </button>
 
             <button onClick={ () => {
-            saveCankerSore()
+            buildAndSaveSore()
             navigate("/select-zone")
             } }>
                 Add More
