@@ -19,7 +19,9 @@ export function calculateScaledXY(x: number, y: number, imageName: string) {
     const scale = imageScale[zoneName];
     const xScaled = (x * scale.scaleX) + scale.xOffset;
     const yScaled = (y * scale.scaleY) + scale.yOffset;
+    const xRatio = xScaled / 380
+    const yRatio = yScaled / 380
 
-    return [xScaled, yScaled]
+    return [xRatio, yRatio]
 
 }

@@ -13,7 +13,7 @@ import SoreCircle from "./SoreCircle";
 const MouthImage: React.FC = () => {
 
     const navigate = useNavigate();
-    const [sorePosition, setSorePosition] = useState<{ x: number; y: number } | null>(null);
+    const [sorePosition, setSorePosition] = useState<{ x: number; y: number, imageSize: number } | null>(null);
     const [soreSize, setSoreSize] = useState(3);
     const [painLevel, setSorePainLevel] = useState(3);
     const { zone } = useParams<{ zone: string}>();
@@ -22,9 +22,10 @@ const MouthImage: React.FC = () => {
 
     const handleImageClick = (event: React.MouseEvent<HTMLImageElement, MouseEvent>) => {
     const rect = event.currentTarget.getBoundingClientRect();
-    const x = event.clientX - rect.left; 
-    const y = event.clientY - rect.top; 
-    setSorePosition({ x, y }); 
+    const imageSize = rect.width
+    const x = event.clientX - rect.left 
+    const y = event.clientY - rect.top 
+    setSorePosition({ x, y, imageSize}); 
     };
 
     const handleContextMenu = (event: React.MouseEvent) => {
@@ -43,18 +44,24 @@ const MouthImage: React.FC = () => {
     async function buildAndSaveSore() {
 
         if (!sorePosition || zone === undefined) return;
+        //  Convert corrinates to XY offset ratio for mapping on responsive images.
+        const xRatio = sorePosition.x / sorePosition.imageSize; 
+        const yRatio = sorePosition.y / sorePosition.imageSize;
 
-        const scaledXY = calculateScaledXY(sorePosition?.x, sorePosition?.y, zone) 
+        // Convert points to original image scale dimensions of 380x380
+        const xPosition = 380 * xRatio
+        const yPosition = 380 * yRatio 
+        const scaledXY = calculateScaledXY(xPosition, yPosition, zone) 
 
         const newSore: CankerSore = {
             id: uuidv4(),
             lastUpdated: [new Date()],
-            numberOfDays: 5,
+            numberOfDays: 1,
             locationImage: zone,
             soreSize: [soreSize],
             painLevel: [painLevel], 
-            xCoordinateZoomed: sorePosition.x, 
-            yCoordinateZoomed: sorePosition.y,
+            xCoordinateZoomed: xRatio, 
+            yCoordinateZoomed: yRatio,
             xCoordinateScaled: scaledXY[0],
             yCoordinateScaled: scaledXY[1],
         }
