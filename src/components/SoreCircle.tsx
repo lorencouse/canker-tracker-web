@@ -1,32 +1,32 @@
 import React from "react";
 
-interface SoreCircle {
+interface SoreCircleProps {
     id: string;
     x: number;
     y: number;
     size: number;
     pain: number;
+    selected: boolean;
 }
 
 const getColor = (step: number) => {
-        const value = step * 28;
-        return `rgb(${value}, ${255 - value}, ${255 - value})`;
-    };
+    const value = step * 28;
+    return `rgb(${value}, ${255 - value}, ${255 - value})`;
+};
 
-function SoreCircle({id, x, y, size, pain}: SoreCircle) {
-
+const SoreCircle: React.FC<SoreCircleProps> = React.memo(({ id, x, y, size, pain, selected }) => {
     return (
-
-    <div className="canker-sore" 
+        <div className="canker-sore" 
             style={{
-            left: x, 
-            top: y, 
-            width: `${size}px`,
-            height: `${size}px`,
-            backgroundColor: getColor(pain),
-            }}></div>
+                left: `${x * 100}%`,
+                top: `${y * 100}%`, 
+                width: `${selected ? size * 2 : size}px`,
+                height: `${selected ? size * 2 : size}px`,
+                backgroundColor: getColor(pain),
+                border: selected ? "3px solid black" : "2px solid white",
+            }}
+        ></div>
+    );
+});
 
-    )
-}
-
-export default SoreCircle
+export default SoreCircle;

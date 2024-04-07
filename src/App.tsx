@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
-import MouthImage from './components/MouthImage';
-import MouthZoneSelector from './components/MouthZoneSelector';
-import MouthOverview from './components/MouthOverview';
+import MouthImage from './views/AddSoreView';
+import MouthZoneSelector from './views/MouthZoneSelectorView';
+import MouthOverview from './views/MouthOverview';
+import AddSoreView from './views/AddSoreView';
 
 function App() {
 
@@ -15,7 +16,8 @@ function App() {
       <Routes>
         <Route path="/" element={<MouthOverview />} />
         <Route path='/select-zone' element={<MouthZoneSelector />} />
-        <Route path='/mouth-zone/:zone' element={<MouthImage />} />
+        <Route path='/mouth-zone/:zone' element={<AddSoreView />} />
+        <Route path='/edit-sore/:zone' element={<MouthImage />} />
       </Routes>
 
     </div>

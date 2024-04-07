@@ -31,7 +31,7 @@ const MouthZoneSelector: React.FC = () => {
         }
     }
 
-    navigate(`/mouth-zone/${zoneName}.png`)
+    navigate(`/mouth-zone/${zoneName}`)
 
 
     }

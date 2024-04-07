@@ -6,26 +6,35 @@ import { v4 as uuidv4 } from 'uuid';
 import { calculateScaledXY } from "../utilities/CankerSoreManager";
 import { db } from '../firebaseConfig';
 import { saveSore } from '../services/firestoreService'; 
-import Slider from "./Slider";
-import SoreCircle from "./SoreCircle";
+import Slider from "../components/Slider";
+import SoreCircle from "../components/SoreCircle";
 
 
-const MouthImage: React.FC = () => {
+const AddSoreView: React.FC = () => {
 
     const navigate = useNavigate();
-    const [sorePosition, setSorePosition] = useState<{ x: number; y: number, imageSize: number } | null>(null);
+    const [sorePosition, setSorePosition] = useState<{ xRatio: number; yRatio: number; scaledXY: number[]; } | null>(null);
     const [soreSize, setSoreSize] = useState(3);
     const [painLevel, setSorePainLevel] = useState(3);
     const { zone } = useParams<{ zone: string}>();
-    const imageUrl = `../assets/images/${zone}`
+    const imageUrl = `../assets/images/${zone}.png`
 
 
     const handleImageClick = (event: React.MouseEvent<HTMLImageElement, MouseEvent>) => {
     const rect = event.currentTarget.getBoundingClientRect();
-    const imageSize = rect.width
-    const x = event.clientX - rect.left 
-    const y = event.clientY - rect.top 
-    setSorePosition({ x, y, imageSize}); 
+
+    const xVal = event.clientX - rect.left; 
+    const yVal = event.clientY - rect.top;
+
+    const xRatio = xVal / rect.width;
+    const yRatio = yVal / rect.height;
+
+// calculated Scaled Overview coordinates
+    if (!zone) return;
+    const scaledXY = calculateScaledXY(xRatio, yRatio, zone) 
+    
+
+    setSorePosition({ xRatio, yRatio, scaledXY}); 
     };
 
     const handleContextMenu = (event: React.MouseEvent) => {
@@ -44,14 +53,6 @@ const MouthImage: React.FC = () => {
     async function buildAndSaveSore() {
 
         if (!sorePosition || zone === undefined) return;
-        //  Convert corrinates to XY offset ratio for mapping on responsive images.
-        const xRatio = sorePosition.x / sorePosition.imageSize; 
-        const yRatio = sorePosition.y / sorePosition.imageSize;
-
-        // Convert points to original image scale dimensions of 380x380
-        const xPosition = 380 * xRatio
-        const yPosition = 380 * yRatio 
-        const scaledXY = calculateScaledXY(xPosition, yPosition, zone) 
 
         const newSore: CankerSore = {
             id: uuidv4(),
@@ -60,10 +61,10 @@ const MouthImage: React.FC = () => {
             locationImage: zone,
             soreSize: [soreSize],
             painLevel: [painLevel], 
-            xCoordinateZoomed: xRatio, 
-            yCoordinateZoomed: yRatio,
-            xCoordinateScaled: scaledXY[0],
-            yCoordinateScaled: scaledXY[1],
+            xCoordinateZoomed: sorePosition.xRatio, 
+            yCoordinateZoomed: sorePosition.yRatio,
+            xCoordinateScaled: sorePosition.scaledXY[0],
+            yCoordinateScaled: sorePosition.scaledXY[1],
         }
 
         await saveSore(newSore);
@@ -77,7 +78,7 @@ const MouthImage: React.FC = () => {
             <img src = {imageUrl} alt="Mouth Diagram" onClick={handleImageClick} onContextMenu={handleContextMenu}/>
             {sorePosition && (
 
-            <SoreCircle id="" x={sorePosition.x} y={sorePosition.y} size={soreSize} pain={painLevel} />
+            <SoreCircle id="" x={sorePosition.xRatio} y={sorePosition.yRatio} size={soreSize} pain={painLevel} selected={false}/>
             
             )}
 
@@ -114,6 +115,6 @@ const MouthImage: React.FC = () => {
 
 };
 
-export default MouthImage
+export default AddSoreView
 
 

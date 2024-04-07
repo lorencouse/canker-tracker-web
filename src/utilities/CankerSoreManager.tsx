@@ -9,18 +9,24 @@ export function calculateScaledXY(x: number, y: number, imageName: string) {
         rightCheek: { scaleX: 0.338, scaleY: 1.583, xOffset: 250, yOffset: -191.16 }
 
     }
+    // Convert coordinates on 380x380 image
+    const xVal = x * 380
+    const yVal = y * 380
+
 
     const zoneName = imageName.replace('.png', '');
 
     if (!(zoneName in imageScale)) {
         throw new Error(`${zoneName} not found.`)
     }
-    
+    // Calculate offset for Zoom
     const scale = imageScale[zoneName];
-    const xScaled = (x * scale.scaleX) + scale.xOffset;
-    const yScaled = (y * scale.scaleY) + scale.yOffset;
-    const xRatio = xScaled / 380
-    const yRatio = yScaled / 380
+    const xScaled = (xVal * scale.scaleX) + scale.xOffset;
+    const yScaled = (yVal * scale.scaleY) + scale.yOffset;
+
+    // Convert to oginial 380x380px image scale values to ratio
+    const xRatio = (xScaled / 380)
+    const yRatio = (yScaled / 380)
 
     return [xRatio, yRatio]
 
