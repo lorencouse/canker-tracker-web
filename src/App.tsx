@@ -5,11 +5,16 @@ import MouthImage from './views/AddSoreView';
 import MouthZoneSelector from './views/MouthZoneSelectorView';
 import MouthOverview from './views/MouthOverview';
 import AddSoreView from './views/AddSoreView';
+import EditSoreView from './views/EditSoreView';
+import { CankerSoresProvider } from './context/CankerSoresContext';
+
 
 function App() {
 
 
   return (
+<CankerSoresProvider>
+
 <Router>
     <div className="App">
 
@@ -17,12 +22,14 @@ function App() {
         <Route path="/" element={<MouthOverview />} />
         <Route path='/select-zone' element={<MouthZoneSelector />} />
         <Route path='/mouth-zone/:zone' element={<AddSoreView />} />
-        <Route path='/edit-sore/:zone' element={<MouthImage />} />
+        <Route path='/edit-sore/' element={<EditSoreView />} />
       </Routes>
 
     </div>
 
 </Router>
+</CankerSoresProvider>
+
 
 
   );

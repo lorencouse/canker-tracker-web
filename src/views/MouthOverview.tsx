@@ -2,9 +2,18 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import "./MouthImage.css";
 import ExistingSoresDiagram from "../components/ExistingSoresDiagram";
+import { useCankerSores } from "../context/CankerSoresContext";
 
 const MouthOverview: React.FC = () => {
     const navigate = useNavigate();
+    const { selectedSore } = useCankerSores(); 
+    const editButtonHandler = () => {
+        if (selectedSore) {
+            navigate('/edit-sore/');
+        } else {
+            alert("Please select a sore to edit.");
+        }
+    };
 
 
     return (
@@ -12,7 +21,7 @@ const MouthOverview: React.FC = () => {
             <ExistingSoresDiagram viewName="mouthDiagramNoLabels" />
             <div className="buttons">
                 <button onClick={() => navigate('/select-zone')}>Add</button>
-                <button onClick={() => navigate('/edit-sore')}>Edit</button>
+                <button onClick={editButtonHandler}>Edit</button>
             </div>
         </div>
     );

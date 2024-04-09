@@ -1,17 +1,21 @@
 import React, { useEffect, useState, useRef } from "react";
 import SoreCircle from "./SoreCircle";
+import { useCankerSores } from "../context/CankerSoresContext";
+import { loadCankerSores } from "../services/firestoreService";
 import { CankerSore } from "../types";
-import { loadAllCankerSores } from "../services/firestoreService";
+import SoreDetails from "./SoreDetails";
+import SoreSliders from "./SoreSliders";
 
 interface ExistingSoresDiagramProps {
     viewName: string;
 }
 
-function ExistingSoresDiagram( { viewName } : ExistingSoresDiagramProps) {
-    const [cankerSores, setCankerSores] = useState<CankerSore[]>([]);
-    const imageRef = useRef<HTMLImageElement>(null); 
-    const [imageSize, setImageSize] = useState<number>(380)
-    const [selectedSore, setSelectedSore] = useState<CankerSore | null>(null);
+function ExistingSoresDiagram({ viewName }: ExistingSoresDiagramProps) {
+    const { selectedSore, setSelectedSore } = useCankerSores();
+    const [cankerSores, setCankerSores] = useState<CankerSore[]>([]); 
+    const imageRef = useRef<HTMLImageElement>(null);
+    const [imageSize, setImageSize] = useState<number>(380);
+    
     const handleImageClick = (event: React.MouseEvent<HTMLImageElement, MouseEvent>) => {
         const rect = imageRef.current?.getBoundingClientRect();
 
@@ -31,15 +35,12 @@ function ExistingSoresDiagram( { viewName } : ExistingSoresDiagramProps) {
             if (dist < minDistance) {
                 minDistance = dist;
                 nearestSore = sore
-                console.log(nearestSore.xCoordinateScaled)
             }
 
         });
 
         setSelectedSore(nearestSore);
-        
-    }
-
+    };
 
     useEffect(() => {
 
@@ -61,14 +62,17 @@ function ExistingSoresDiagram( { viewName } : ExistingSoresDiagramProps) {
 
     useEffect(() => {
         const fetchSores = async () => {
-            const loadedSores = await loadAllCankerSores();
+            const loadedSores = await loadCankerSores(viewName);
             setCankerSores(loadedSores);
         };
 
         fetchSores();
     }, []);
+
     const imageURL = `../assets/images/${viewName}.png`
     return (
+        <div className="existing-sores-digram">
+
         <div className="mouth-image-container">
                 <img ref={imageRef} src={imageURL} alt="Mouth Diagram Overview" onLoad={updateImageSize} onClick={handleImageClick}/>
                 {cankerSores.map((sore) => (
@@ -83,7 +87,11 @@ function ExistingSoresDiagram( { viewName } : ExistingSoresDiagramProps) {
                     selected={sore.id === selectedSore?.id ? true : false}
                 />
                 ))}
+
             </div>
+            {/* {viewName !== "mouthDiagramNoLabels" <SoreSliders} */}
+            {selectedSore && <SoreDetails sore={selectedSore} />}
+        </div>
     )
 }
 

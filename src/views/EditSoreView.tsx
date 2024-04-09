@@ -1,14 +1,29 @@
 import React, {useState} from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from 'react-router-dom';
 import { CankerSore } from "../types";
-import SoreCircle from "../components/SoreCircle";
+import { useCankerSores } from "../context/CankerSoresContext";
 import './MouthImage.css';
+import ExistingSoresDiagram from "../components/ExistingSoresDiagram";
+import SoreSliders from "../components/SoreSliders";
 
 const EditSoreView: React.FC = () => {
     const navigate = useNavigate();
+    const [soreSize, setSoreSize] = useState(3);
+    const [painLevel, setPainLevel] = useState(3);
+    const { selectedSore } = useCankerSores();
+
+    const handleSelectedSore = (sore: CankerSore) =>{
+        setSoreSize(sore.soreSize[sore.soreSize.length - 1]);
+        setPainLevel(sore.painLevel[sore.painLevel.length - 1]);
+
+    }
     
     return (
-        <div></div>
+        <div className="edit-sore-container">
+            <ExistingSoresDiagram viewName={selectedSore?.locationImage ?? "leftCheek"} />
+            <SoreSliders soreSize={soreSize} setSoreSize={setSoreSize} painLevel={painLevel} setPainLevel={setPainLevel} />
+
+        </div>
     )
 
 

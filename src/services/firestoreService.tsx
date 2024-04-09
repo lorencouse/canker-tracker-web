@@ -1,5 +1,5 @@
 import { db } from '../firebaseConfig';
-import { collection, addDoc, getDocs, doc, setDoc } from 'firebase/firestore';
+import { collection, addDoc, getDocs, doc, setDoc, query, where } from 'firebase/firestore';
 import { CankerSore } from '../types';
 
 // Function to save data to a specified collection
@@ -24,9 +24,16 @@ export const loadData = async (collectionName: string) => {
   }
 };
 
-export const loadAllCankerSores = async (): Promise<CankerSore[]> => {
-    const cankerSoreCollectionRef = collection(db, 'cankerSores');
-    const querySnapshot = await getDocs(cankerSoreCollectionRef);
+export const loadCankerSores = async (viewName: string): Promise<CankerSore[]> => {
+  let q;
+  if (viewName === "mouthDiagramNoLabels") {
+    q = collection(db, 'cankerSores') ;
+
+  } else {
+    q = query(collection(db, 'cankerSores'), where('locationImage', '==', viewName));
+  }
+
+    const querySnapshot = await getDocs(q);
 
     const cankerSores: CankerSore[] = querySnapshot.docs.map(doc => {
         const data = doc.data();
