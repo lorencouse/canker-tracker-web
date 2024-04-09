@@ -5,60 +5,45 @@ import { loadCankerSores } from "../services/firestoreService";
 import { CankerSore } from "../types";
 import SoreDetails from "./SoreDetails";
 import SoreSliders from "./SoreSliders";
+import { handleAddSoreClick } from "../utilities/AddSoreClick";
+import { handleFindNearestSoreClick } from "../utilities/NearestSoreClick";
 
 interface ExistingSoresDiagramProps {
     viewName: string;
+    addMode: boolean
 }
 
-function ExistingSoresDiagram({ viewName }: ExistingSoresDiagramProps) {
-    const { selectedSore, setSelectedSore } = useCankerSores();
+function ExistingSoresDiagram({ viewName, addMode }: ExistingSoresDiagramProps) {
     const [cankerSores, setCankerSores] = useState<CankerSore[]>([]); 
+    const [selectedSore, setSelectedSore] = useState<CankerSore | null>(null);
     const imageRef = useRef<HTMLImageElement>(null);
     const [imageSize, setImageSize] = useState<number>(380);
-    
+    const { setSelectedSore: setSelectedSoreContext } = useCankerSores();
+
+
     const handleImageClick = (event: React.MouseEvent<HTMLImageElement, MouseEvent>) => {
-        const rect = imageRef.current?.getBoundingClientRect();
-
-        if (!rect) return;
-
-        const X = (event.clientX - rect.left) / rect.width;
-        const Y = (event.clientY - rect.top) / rect.height;
-        let nearestSore = null;
-        let minDistance = Infinity;
-
-        cankerSores.forEach(sore => {
-            const soreX = sore.xCoordinateScaled ?? 0;
-            const soreY = sore.yCoordinateScaled ?? 0;
-
-            const dist = Math.sqrt(Math.pow(X - soreX, 2) + Math.pow(Y - soreY, 2));
-
-            if (dist < minDistance) {
-                minDistance = dist;
-                nearestSore = sore
-            }
-
-        });
-
-        setSelectedSore(nearestSore);
+        if (addMode) {
+            handleAddSoreClick(event, viewName, setSelectedSore);
+        } else {
+            handleFindNearestSoreClick(event, cankerSores, setSelectedSore, imageRef);
+        }
     };
+    
 
     useEffect(() => {
-
         updateImageSize();
-
         window.addEventListener("resize", updateImageSize);
 
         return () => {
             window.removeEventListener("resize", updateImageSize)
         };
-
     }, []);
 
     const updateImageSize = () => {
-            if (imageRef.current) {
-                setImageSize(imageRef.current.offsetHeight)
-            }
+        if (imageRef.current) {
+            setImageSize(imageRef.current.offsetHeight)
         }
+    }
 
     useEffect(() => {
         const fetchSores = async () => {
@@ -70,29 +55,42 @@ function ExistingSoresDiagram({ viewName }: ExistingSoresDiagramProps) {
     }, []);
 
     const imageURL = `../assets/images/${viewName}.png`
+    
     return (
-        <div className="existing-sores-digram">
-
-        <div className="mouth-image-container">
+        <div className="existing-sores-diagram">
+            <div className="mouth-image-container">
                 <img ref={imageRef} src={imageURL} alt="Mouth Diagram Overview" onLoad={updateImageSize} onClick={handleImageClick}/>
                 {cankerSores.map((sore) => (
-                
-                <SoreCircle 
-                    key={sore.id} 
-                    id={sore.id} 
-                    x={sore.xCoordinateScaled ? sore.xCoordinateScaled : 0}
-                    y={sore.yCoordinateScaled ? sore.yCoordinateScaled : 0} 
-                    size={sore.soreSize[sore.soreSize.length - 1] * (imageSize/200) ?? 1} 
-                    pain={sore.painLevel[sore.painLevel.length - 1] ?? 1} 
-                    selected={sore.id === selectedSore?.id ? true : false}
-                />
+                    <SoreCircle 
+                        key={sore.id} 
+                        id={sore.id} 
+                        x={viewName === "mouthDiagramNoLabels" ? (sore.xCoordinateScaled ?? 0) : (sore.xCoordinateZoomed ?? 0)}
+                        y={viewName === "mouthDiagramNoLabels" ? (sore.yCoordinateScaled ?? 0) : (sore.yCoordinateZoomed ?? 0)} 
+                        size={sore.soreSize[sore.soreSize.length - 1] ?? 1} 
+                        pain={sore.painLevel[sore.painLevel.length - 1] ?? 1} 
+                        selected={sore.id === selectedSore?.id ? true : false}
+                    />
                 ))}
-
+                {selectedSore && (
+                <SoreCircle id="" x={selectedSore.xCoordinateZoomed ?? 0} y={selectedSore.yCoordinateZoomed ?? 0} size={selectedSore.soreSize[0]} pain={selectedSore.painLevel[0]} selected={false}/>
+            )}
             </div>
-            {/* {viewName !== "mouthDiagramNoLabels" <SoreSliders} */}
+
+
+
             {selectedSore && <SoreDetails sore={selectedSore} />}
+
+            {viewName !== "mouthDiagramNoLabels" && selectedSore && (
+                <SoreSliders 
+                    soreSize={selectedSore.soreSize[0]}
+                    setSoreSize={(size: number) => setSelectedSore(prevState => prevState ? ({...prevState, soreSize: [size]}) : null)}
+                    painLevel={selectedSore.painLevel[0]}
+                    setPainLevel={(level: number) => setSelectedSore(prevState => prevState ? ({...prevState, painLevel: [level]}) : null)}
+                />
+            )}
+
         </div>
     )
 }
 
-export default ExistingSoresDiagram
+export default ExistingSoresDiagram;

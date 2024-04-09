@@ -7,38 +7,40 @@ import "./MouthImage.css";
 const MouthZoneSelector: React.FC = () => {
 
     const navigate = useNavigate();
-    const handleSelectMouthZone = (event: React.MouseEvent<HTMLImageElement, MouseEvent>) => {
+
+    const handleSelectMouthZoneClick = (event: React.MouseEvent<HTMLImageElement, MouseEvent>) => {
         const rect = event.currentTarget.getBoundingClientRect();
         const x = event.clientX - rect.left; 
         const y = event.clientY - rect.top; 
-        var zoneName: String
+        var viewName: String
 
     if (y < rect.height / 2) {
         if (x < rect.width * 0.33) {
-            zoneName = "leftCheek";
+            viewName = "leftCheek";
         } else if (x < rect.width * 0.66) {
-            zoneName = "upperGums";
+            viewName = "upperGums";
         } else {
-            zoneName = "rightCheek";
+            viewName = "rightCheek";
         }
     } else { 
         if (x < rect.width * 0.33) {
-            zoneName = "lips";
+            viewName = "lips";
         } else if (x < rect.width * 0.66) {
-            zoneName = "tongue";
+            viewName = "tongue";
         } else {
-            zoneName = "lowerGums";
+            viewName = "lowerGums";
         }
     }
 
-    navigate(`/mouth-zone/${zoneName}`)
+    navigate('/', { state: { viewName, addMode: true } });
+
 
 
     }
     
     return (
         <div className="mouth-image-container" >
-            <img src="../assets/images/mouthDiagram.png" alt="Mouth Zones" onClick={handleSelectMouthZone}/>
+            <img src="../assets/images/mouthDiagram.png" alt="Mouth Zones" onClick={handleSelectMouthZoneClick}/>
         </div>
     );
 

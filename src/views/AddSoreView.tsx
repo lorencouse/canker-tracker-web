@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from 'react-router-dom'; 
 import './MouthImage.css';
+import { calculateScaledXY } from "../utilities/CankerSoreManager";
 import { CankerSore } from "../types";
 import { v4 as uuidv4 } from 'uuid';
-import { calculateScaledXY } from "../utilities/CankerSoreManager";
 import { db } from '../firebaseConfig';
 import { saveSore } from '../services/firestoreService'; 
 import SoreCircle from "../components/SoreCircle";
@@ -22,7 +22,7 @@ const AddSoreView: React.FC = () => {
     const imageUrl = `../assets/images/${zone}.png`
 
 
-    const handleImageClick = (event: React.MouseEvent<HTMLImageElement, MouseEvent>) => {
+    const handleAddSoreClick = (event: React.MouseEvent<HTMLImageElement, MouseEvent>) => {
         const rect = event.currentTarget.getBoundingClientRect();
 
         const xVal = event.clientX - rect.left; 
@@ -46,8 +46,6 @@ const AddSoreView: React.FC = () => {
             xCoordinateScaled: scaledXY[0],
             yCoordinateScaled: scaledXY[1],
         };
-
-
         setSelectedSore(newSelectedSore);
         setSelectedSoreContext(newSelectedSore);
 
@@ -85,7 +83,7 @@ const AddSoreView: React.FC = () => {
 
         <div className="mouth-image-container" >
             
-            <img src = {imageUrl} alt="Mouth Diagram" onClick={handleImageClick} onContextMenu={handleContextMenu}/>
+            <img src = {imageUrl} alt="Mouth Diagram" onClick={handleAddSoreClick} onContextMenu={handleContextMenu}/>
              {selectedSore && (
                 <SoreCircle id="" x={selectedSore.xCoordinateZoomed ?? 0} y={selectedSore.yCoordinateZoomed ?? 0} size={selectedSore.soreSize[0]} pain={selectedSore.painLevel[0]} selected={false}/>
             )}
@@ -102,7 +100,7 @@ const AddSoreView: React.FC = () => {
             )}
 
 
-        <div className="navigation-buttons">
+        <div className="add-sore-buttons">
             <button onClick={ () =>  {
             buildAndSaveSore()
             navigate("/")
