@@ -22,34 +22,34 @@ const AddSoreView: React.FC = () => {
     const imageUrl = `../assets/images/${zone}.png`
 
 
-    const handleAddSoreClick = (event: React.MouseEvent<HTMLImageElement, MouseEvent>) => {
-        const rect = event.currentTarget.getBoundingClientRect();
+    // const handleAddSoreClick = (event: React.MouseEvent<HTMLImageElement, MouseEvent>) => {
+    //     const rect = event.currentTarget.getBoundingClientRect();
 
-        const xVal = event.clientX - rect.left; 
-        const yVal = event.clientY - rect.top;
+    //     const xVal = event.clientX - rect.left; 
+    //     const yVal = event.clientY - rect.top;
 
-        const xRatio = xVal / rect.width;
-        const yRatio = yVal / rect.height;
+    //     const xRatio = xVal / rect.width;
+    //     const yRatio = yVal / rect.height;
 
-        if (!zone) return;
-        const scaledXY = calculateScaledXY(xRatio, yRatio, zone);
+    //     if (!zone) return;
+    //     const scaledXY = calculateScaledXY(xRatio, yRatio, zone);
         
-        const newSelectedSore: CankerSore = {
-            id: uuidv4(),
-            lastUpdated: [new Date()],
-            numberOfDays: 1,
-            locationImage: zone,
-            soreSize: [3], // Default size
-            painLevel: [3], // Default pain level
-            xCoordinateZoomed: xRatio, 
-            yCoordinateZoomed: yRatio,
-            xCoordinateScaled: scaledXY[0],
-            yCoordinateScaled: scaledXY[1],
-        };
-        setSelectedSore(newSelectedSore);
-        setSelectedSoreContext(newSelectedSore);
+    //     const newSelectedSore: CankerSore = {
+    //         id: uuidv4(),
+    //         lastUpdated: [new Date()],
+    //         numberOfDays: 1,
+    //         locationImage: zone,
+    //         soreSize: [3], // Default size
+    //         painLevel: [3], // Default pain level
+    //         xCoordinateZoomed: xRatio, 
+    //         yCoordinateZoomed: yRatio,
+    //         xCoordinateScaled: scaledXY[0],
+    //         yCoordinateScaled: scaledXY[1],
+    //     };
+    //     setSelectedSore(newSelectedSore);
+    //     setSelectedSoreContext(newSelectedSore);
 
-    };
+    // };
 
     const handleContextMenu = (event: React.MouseEvent) => {
         event.preventDefault();
@@ -83,10 +83,10 @@ const AddSoreView: React.FC = () => {
 
         <div className="mouth-image-container" >
             
-            <img src = {imageUrl} alt="Mouth Diagram" onClick={handleAddSoreClick} onContextMenu={handleContextMenu}/>
+            {/* <img src = {imageUrl} alt="Mouth Diagram" onClick={handleAddSoreClick} onContextMenu={handleContextMenu}/>
              {selectedSore && (
                 <SoreCircle id="" x={selectedSore.xCoordinateZoomed ?? 0} y={selectedSore.yCoordinateZoomed ?? 0} size={selectedSore.soreSize[0]} pain={selectedSore.painLevel[0]} selected={false}/>
-            )}
+            )} */}
         </div>
 
 
@@ -100,7 +100,7 @@ const AddSoreView: React.FC = () => {
             )}
 
 
-        <div className="add-sore-buttons">
+        {/* <div className="add-sore-buttons">
             <button onClick={ () =>  {
             buildAndSaveSore()
             navigate("/")
@@ -115,7 +115,7 @@ const AddSoreView: React.FC = () => {
                 Add More
             </button>
 
-        </div>
+        </div> */}
 
     </div>
 

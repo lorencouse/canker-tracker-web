@@ -1,4 +1,4 @@
-import { CankerSore } from '../types'; 
+import { CankerSore } from '../types';
 import { calculateScaledXY } from './CankerSoreManager';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -7,6 +7,7 @@ export const handleAddSoreClick = (
   viewName: string, 
   setSelectedSore: (sore: CankerSore | null) => void
 ) => {
+
   const rect = event.currentTarget.getBoundingClientRect();
 
   const xVal = event.clientX - rect.left;
@@ -22,8 +23,8 @@ export const handleAddSoreClick = (
       lastUpdated: [new Date()],
       numberOfDays: 1,
       locationImage: viewName,
-      soreSize: [3], // Default size
-      painLevel: [3], // Default pain level
+      soreSize: [3], 
+      painLevel: [3], 
       xCoordinateZoomed: xRatio,
       yCoordinateZoomed: yRatio,
       xCoordinateScaled: scaledXY[0],

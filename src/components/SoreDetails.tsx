@@ -1,7 +1,11 @@
 import React from "react";
 import { CankerSore } from "../types";
 
-function SoreDetails({ sore } : {sore: CankerSore}) {
+interface SoreDetailsProps {
+  sore: CankerSore;
+}
+
+const SoreDetails: React.FC<SoreDetailsProps> = ({ sore }) => {
     return (
         <div className="sore-details-container">
       <ul>
