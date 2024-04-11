@@ -13,7 +13,7 @@ export interface CankerSore {
 
 export interface DailyLog {
     date: Date
-    activeSoresID: string[]
+    activeSoreIDs: string[]
     currentlySick?: boolean
     sugarUse?: boolean
     spicyFood?: boolean

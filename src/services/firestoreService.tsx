@@ -1,5 +1,5 @@
 import { db } from '../firebaseConfig';
-import { collection, addDoc, getDocs, doc, setDoc, query, where } from 'firebase/firestore';
+import { collection, addDoc, getDocs, writeBatch, deleteDoc, doc, setDoc, query, where } from 'firebase/firestore';
 import { CankerSore } from '../types';
 
 export const saveData = async (collectionName: string, data: Record<string, any>) => {
@@ -23,7 +23,7 @@ export const loadData = async (collectionName: string) => {
   }
 };
 
-export const loadCankerSores = async (viewName: string): Promise<CankerSore[]> => {
+export const loadSores = async (viewName: string): Promise<CankerSore[]> => {
   let q;
   if (viewName === "mouthDiagramNoLabels") {
     q = collection(db, 'cankerSores') ;
@@ -66,3 +66,25 @@ export const saveSore = async (cankerSore: CankerSore) => {
   }
 };
 
+export const deleteSore = async (soreId: string) => {
+  try {
+    const soreRef = doc(db, 'cankerSores', soreId); 
+    await deleteDoc(soreRef);
+    console.log(`CankerSore with ID ${soreId} has been deleted.`);
+  } catch (error) {
+    console.error('Error deleting CankerSore:', error);
+    throw error; 
+  }
+};
+
+export const clearAllSores = async () => {
+  const querySnapshot = await getDocs(collection(db, 'cankerSores'));
+  const batch = writeBatch(db); 
+
+  querySnapshot.forEach((document) => {
+    batch.delete(document.ref); 
+  });
+
+  await batch.commit(); 
+  console.log('All canker sore data cleared.');
+};

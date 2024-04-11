@@ -16,11 +16,8 @@ const getColor = (step: number) => {
 
 const SoreCircle: React.FC<SoreCircleProps> = React.memo(({ id, x, y, size, pain, selected }) => {
     let soreSize: number;
-    if (selected) {
-        soreSize = size * .3;
-    } else {
         soreSize = size *.2;
-    }
+
     return (
         <div className="canker-sore" 
             style={{
@@ -29,7 +26,7 @@ const SoreCircle: React.FC<SoreCircleProps> = React.memo(({ id, x, y, size, pain
                 width: `${soreSize}%`,
                 height: `${soreSize}%`,
                 backgroundColor: getColor(pain),
-                border: selected ? "3px solid black" : "2px solid white",
+                border: selected ? "2px solid blue" : "1px solid white",
             }}
         ></div>
     );

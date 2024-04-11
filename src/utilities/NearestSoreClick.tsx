@@ -3,6 +3,7 @@ import React, { RefObject } from 'react';
 
 export const handleFindNearestSoreClick = (
   event: React.MouseEvent<HTMLImageElement, MouseEvent>,
+  viewName: string,
   cankerSores: CankerSore[],
   setSelectedSore: (sore: CankerSore | null) => void,
   imageRef: RefObject<HTMLImageElement>
@@ -16,8 +17,8 @@ export const handleFindNearestSoreClick = (
   let minDistance = Infinity;
 
   cankerSores.forEach(sore => {
-    const soreX = sore.xCoordinateScaled ?? 0;
-    const soreY = sore.yCoordinateScaled ?? 0;
+    const soreX = (viewName === "mouthDiagramNoLabels" ? (sore.xCoordinateScaled ?? 0) : (sore.xCoordinateZoomed ?? 0));
+    const soreY = (viewName === "mouthDiagramNoLabels" ? (sore.yCoordinateScaled ?? 0) : (sore.yCoordinateZoomed ?? 0));
     const dist = Math.sqrt(Math.pow(X - soreX, 2) + Math.pow(Y - soreY, 2));
 
     if (dist < minDistance) {

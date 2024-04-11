@@ -34,8 +34,6 @@ const MouthZoneSelector: React.FC = () => {
 
     navigate('/', { state: { viewName, addMode: true, selectedSore: null } });
 
-
-
     }
     
     return (

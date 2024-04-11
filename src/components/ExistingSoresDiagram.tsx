@@ -22,7 +22,7 @@ function ExistingSoresDiagram({ viewName, addMode, cankerSores, selectedSore }: 
         if (addMode) {
             handleAddSoreClick(event, viewName, setSelectedSore);
         } else {
-            handleFindNearestSoreClick(event, cankerSores, setSelectedSore, imageRef);
+            handleFindNearestSoreClick(event, viewName, cankerSores, setSelectedSore, imageRef);
         }
     };
     
