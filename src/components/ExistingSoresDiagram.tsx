@@ -49,9 +49,9 @@ function ExistingSoresDiagram({ viewName, addMode, cankerSores, selectedSore }: 
                 <img ref={imageRef} src={imageURL} alt={viewName} onLoad={updateImageSize} onClick={handleImageClick}/>
                 {selectedSore && (
                 <SoreCircle id={selectedSore.id} x={viewName === "mouthDiagramNoLabels" ? (selectedSore.xCoordinateScaled ?? 0) : (selectedSore.xCoordinateZoomed ?? 0)}
-                        y={viewName === "mouthDiagramNoLabels" ? (selectedSore.yCoordinateScaled ?? 0) : (selectedSore.yCoordinateZoomed ?? 0)}  size={selectedSore.soreSize[0]} pain={selectedSore.painLevel[0]} selected={false}/>
+                        y={viewName === "mouthDiagramNoLabels" ? (selectedSore.yCoordinateScaled ?? 0) : (selectedSore.yCoordinateZoomed ?? 0)}  size={selectedSore.soreSize[0]} pain={selectedSore.painLevel[0]} selected={true}/>
             )}
-                {cankerSores.map((sore) => (
+                {cankerSores.filter(sore => sore.id !== selectedSore?.id).map((sore) => (
                     <SoreCircle 
                         key={sore.id} 
                         id={sore.id} 
@@ -59,7 +59,7 @@ function ExistingSoresDiagram({ viewName, addMode, cankerSores, selectedSore }: 
                         y={viewName === "mouthDiagramNoLabels" ? (sore.yCoordinateScaled ?? 0) : (sore.yCoordinateZoomed ?? 0)} 
                         size={sore.soreSize[sore.soreSize.length - 1] ?? 1} 
                         pain={sore.painLevel[sore.painLevel.length - 1] ?? 1} 
-                        selected={sore.id === selectedSore?.id ? true : false}
+                        selected={sore.id === selectedSore?.id}
                     />
                 ))}
 

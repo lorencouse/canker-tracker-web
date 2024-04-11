@@ -2,12 +2,11 @@ import { db } from '../firebaseConfig';
 import { collection, addDoc, getDocs, doc, setDoc, query, where } from 'firebase/firestore';
 import { CankerSore } from '../types';
 
-// Function to save data to a specified collection
 export const saveData = async (collectionName: string, data: Record<string, any>) => {
   try {
     const docRef = await addDoc(collection(db, collectionName), data);
     console.log("Document written with ID: ", docRef.id);
-    return docRef.id; // Return the document ID
+    return docRef.id; 
   } catch (e) {
     console.error("Error adding document: ", e);
     throw e; 
@@ -38,7 +37,6 @@ export const loadCankerSores = async (viewName: string): Promise<CankerSore[]> =
     const cankerSores: CankerSore[] = querySnapshot.docs.map(doc => {
         const data = doc.data();
 
-        // Convert Firestore Timestamps to Date objects, if necessary
         const lastUpdated = data.lastUpdated?.map((timestamp: { toDate: () => Date }) => timestamp.toDate()) || [];
 
         return {

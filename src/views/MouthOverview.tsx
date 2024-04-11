@@ -30,9 +30,10 @@ const MouthOverview: React.FC = () => {
 
     useEffect(() => {
         if (location.state) {
-            const { viewName, addMode } = location.state as { viewName: string, addMode: boolean };
+            const { viewName, addMode, selectedSore } = location.state as { viewName: string, addMode: boolean, selectedSore: CankerSore };
             setViewName(viewName);
             setAddMode(addMode);
+            setSelectedSoreContext(selectedSore)
         }
     }, [location]);
 
