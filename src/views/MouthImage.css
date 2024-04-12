@@ -8,16 +8,25 @@
 }
 
 .mouth-image-container {
-    max-width: 100%;
-    height: auto;
+    width: 512px;
+    height: 512px;
+    overflow: hidden;
     position: relative;
-    display: inline-block;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: auto;
+    transition: transform 0.3s ease-out;
 }
 
 .mouth-image-container img {
-    max-width: 512px;
+    position: absolute; /* Allows absolute positioning inside the container */
+    top: 0; left: 0; right: 0; bottom: 0;
     width: 100%;
+    height: 100%; /* Make the image fill the container */
+    object-fit: contain; /* Maintain aspect ratio while filling the container */
 }
+
 
 .canker-sore {
     position: absolute;
@@ -27,7 +36,6 @@
 
 .slider {
     width: 100%;
-
     margin-top: 15px;
     display: flex;
 }
@@ -38,11 +46,9 @@
 }
 
 ul {
-  text-align: left;  
+    text-align: left;  
 }
 
 li {
     padding: 10px;
 }
-
-

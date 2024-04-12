@@ -17,6 +17,7 @@ const MouthOverview: React.FC = () => {
     const location = useLocation();
     const [viewName, setViewName] = useState<string>("mouthDiagramNoLabels")
     const [addMode, setAddMode] = useState<boolean>(false)
+    const [editMode, setEditMode] = useState<boolean>(false)
     const { selectedSore } = useCankerSores(); 
     const { setSelectedSore: setSelectedSoreContext } = useCankerSores();
     const [cankerSores, setCankerSores] = useState<CankerSore[]>([]); 
@@ -42,10 +43,14 @@ const MouthOverview: React.FC = () => {
 
     // Button Handlers
 
+    function addButtonHandler() {
+        setAddMode(true)
+    }
+
     const editButtonHandler = () => {
         if (selectedSore) {
             setCankerSores([])
-            setViewName(selectedSore.locationImage)
+            setEditMode(true)
         } else {
             alert("Please select a sore to edit.");
         }
@@ -126,11 +131,13 @@ async function addMoreButtonHandler() {
     return (
         <div className="mouth-overview">
             
-            <ExistingSoresDiagram viewName={viewName} addMode={addMode} cankerSores={cankerSores} selectedSore={selectedSore}/>
+            <ExistingSoresDiagram viewName={viewName} addMode={addMode} editMode={editMode} cankerSores={cankerSores} selectedSore={selectedSore}/>
 
-            {selectedSore && <SoreDetails sore={selectedSore} />}
+            {selectedSore && !addMode && <SoreDetails sore={selectedSore} />}
 
-            {viewName !== "mouthDiagramNoLabels" && selectedSore && (
+            {addMode && <h1>Select Sore Location</h1>}
+
+            {(editMode || addMode) && 
             <SoreSliders 
                 soreSize={selectedSore ? selectedSore.soreSize[0] : 3}
                 setSoreSize={(size: number) => {
@@ -143,20 +150,20 @@ async function addMoreButtonHandler() {
                     setSelectedSoreContext(newSore);
                 }}
             />
-            )}
+            }
 
-            {addMode && viewName !== "mouthDiagramNoLabels" && ( <div className="add-sore-buttons">
+            {addMode && ( <div className="add-sore-buttons">
                 <button onClick={ finishAddingButtonHandler }>Finish</button>
                 <button onClick={ addMoreButtonHandler }>Add More</button>
             </div>)}
 
-            {viewName === "mouthDiagramNoLabels" && ( <div className="overview-buttons">
-                <button onClick={() => navigate('/select-zone')}>Add</button>
+            {!addMode && !editMode && ( <div className="overview-buttons">
+                <button onClick={ addButtonHandler }>Add</button>
                 <button onClick={ editButtonHandler }>Edit</button>
                 <button onClick= { deletedAllButtonHandler }>Clear all</button>
             </div> )}
 
-            {!addMode && viewName !== "mouthDiagramNoLabels" && ( <div className="edit-sore-buttons">
+            {editMode && ( <div className="edit-sore-buttons">
                 <button onClick={ finishEditingButtonHandler }>Finish</button>
                 <button onClick={ deleteSoreButtonHandler }>Delete</button>
             </div>)}
