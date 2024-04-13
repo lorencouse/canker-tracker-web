@@ -5,10 +5,10 @@ export interface CankerSore {
     locationImage: string;
     soreSize: number[];
     painLevel: number[];
-    xCoordinateZoomed?: number;
-    yCoordinateZoomed?: number;
-    xCoordinateScaled?: number;
-    yCoordinateScaled?: number;
+    // xCoordinateZoomed?: number;
+    // yCoordinateZoomed?: number;
+    xCoordinate?: number;
+    yCoordinate?: number;
 }
 
 export interface DailyLog {

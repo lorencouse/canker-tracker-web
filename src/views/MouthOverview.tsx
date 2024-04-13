@@ -85,16 +85,14 @@ async function addMoreButtonHandler() {
     async function finishAddingButtonHandler() {
         if (selectedSore) {
             try {
-                setAddMode(false);
                 setSelectedSoreContext(null)
-                setViewName("mouthDiagramNoLabels");
+                setAddMode(false);
                 await saveSore(selectedSore);
             } catch (error) {
                 console.error("Failed to finish adding:", error);
             }
         } else {
                 setAddMode(false);
-                setViewName("mouthDiagramNoLabels");
         }
     }
 
@@ -102,13 +100,15 @@ async function addMoreButtonHandler() {
         if (selectedSore) {
             try {
                 setSelectedSoreContext(null)
-                setViewName("mouthDiagramNoLabels");
+                // setViewName("mouthDiagramNoLabels");
+                setEditMode(false)
                 await saveSore(selectedSore);
             } catch (error) {
                 console.error("Failed to update:", error);
             }
         } else {
-                setViewName("mouthDiagramNoLabels");
+                setEditMode(false)
+                // setViewName("mouthDiagramNoLabels");
         }
     }
 
