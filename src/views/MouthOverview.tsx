@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
 import "./MouthImage.css";
 import ExistingSoresDiagram from "../components/ExistingSoresDiagram";
 import { CankerSore } from "../types";
@@ -8,37 +7,23 @@ import { loadSores, clearAllSores, deleteSore } from "../services/firestoreServi
 import SoreDetails from "../components/SoreDetails";
 import SoreSliders from "../components/SoreSliders";
 import { saveSore } from '../services/firestoreService'; 
-import { async } from "@firebase/util";
-import { error } from "console";
 
 
 const MouthOverview: React.FC = () => {
-    const navigate = useNavigate();
-    const location = useLocation();
-    const [viewName, setViewName] = useState<string>("mouthDiagramNoLabels")
     const [addMode, setAddMode] = useState<boolean>(false)
     const [editMode, setEditMode] = useState<boolean>(false)
     const { selectedSore } = useCankerSores(); 
     const { setSelectedSore: setSelectedSoreContext } = useCankerSores();
     const [cankerSores, setCankerSores] = useState<CankerSore[]>([]); 
 
-    useEffect(() => {
-        const fetchSores = async () => {
-            const loadedSores = await loadSores(viewName);
-            setCankerSores(loadedSores);
-        };
-
-        fetchSores();
-    }, [viewName]);
-
-    useEffect(() => {
-        if (location.state) {
-            const { viewName, addMode, selectedSore } = location.state as { viewName: string, addMode: boolean, selectedSore: CankerSore };
-            setViewName(viewName);
-            setAddMode(addMode);
-            setSelectedSoreContext(selectedSore)
-        }
-    }, [location]);
+    const fetchSores = async () => {
+        try {
+                const loadedSores = await loadSores("mouthDiagramNoLabels");
+                setCankerSores(loadedSores);
+        } catch (error) {
+                console.log("Could not refresh sores" + error)
+            }
+    };
 
 
     // Button Handlers
@@ -49,25 +34,23 @@ const MouthOverview: React.FC = () => {
 
     const editButtonHandler = () => {
         if (selectedSore) {
-            setCankerSores([])
             setEditMode(true)
         } else {
             alert("Please select a sore to edit.");
         }
     };
 
-async function addMoreButtonHandler() {
-    if (selectedSore) {
-        try {
-            await saveSore(selectedSore);
-            navigate('/select-zone');
-        } catch (error) {
-            console.error("Failed to save sore and navigate:", error);
+    async function addMoreButtonHandler() {
+        if (selectedSore) {
+            try {
+                await saveSore(selectedSore);
+            } catch (error) {
+                console.error("Failed to save sore and navigate:", error);
+            }
+        } else {
+            alert("Please click image to select sore location.")
         }
-    } else {
-        alert("Please click image to select sore location.")
     }
-}
 
     async function deletedAllButtonHandler() {
         if (window.confirm("Are you sure you want to delete all cankersores?")) {
@@ -88,6 +71,7 @@ async function addMoreButtonHandler() {
                 setSelectedSoreContext(null)
                 setAddMode(false);
                 await saveSore(selectedSore);
+                fetchSores();
             } catch (error) {
                 console.error("Failed to finish adding:", error);
             }
@@ -99,16 +83,15 @@ async function addMoreButtonHandler() {
     async function finishEditingButtonHandler() {
         if (selectedSore) {
             try {
-                setSelectedSoreContext(null)
-                // setViewName("mouthDiagramNoLabels");
-                setEditMode(false)
+                setSelectedSoreContext(null);
+                setEditMode(false);
                 await saveSore(selectedSore);
+                fetchSores();
             } catch (error) {
                 console.error("Failed to update:", error);
             }
         } else {
                 setEditMode(false)
-                // setViewName("mouthDiagramNoLabels");
         }
     }
 
@@ -117,7 +100,7 @@ async function addMoreButtonHandler() {
             try {
                 await deleteSore(selectedSore.id);
                 setSelectedSoreContext(null);
-                setViewName("mouthDiagramNoLabels");
+                fetchSores();
             } catch (error) {
                 console.error("Failed to delete sore: ", error)
             } 
@@ -131,7 +114,7 @@ async function addMoreButtonHandler() {
     return (
         <div className="mouth-overview">
             
-            <ExistingSoresDiagram viewName={viewName} addMode={addMode} editMode={editMode} cankerSores={cankerSores} selectedSore={selectedSore}/>
+            <ExistingSoresDiagram addMode={addMode} editMode={editMode} cankerSores={cankerSores} selectedSore={selectedSore}/>
 
             {selectedSore && !addMode && <SoreDetails sore={selectedSore} />}
 

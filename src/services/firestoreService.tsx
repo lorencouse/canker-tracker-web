@@ -46,10 +46,10 @@ export const loadSores = async (viewName: string): Promise<CankerSore[]> => {
             locationImage: data.locationImage,
             soreSize: data.soreSize,
             painLevel: data.painLevel,
-            xCoordinateZoomed: data.xCoordinateZoomed,
-            yCoordinateZoomed: data.yCoordinateZoomed,
-            xCoordinateScaled: data.xCoordinateScaled,
-            yCoordinateScaled: data.yCoordinateScaled,
+            // xCoordinateZoomed: data.xCoordinateZoomed,
+            // yCoordinateZoomed: data.yCoordinateZoomed,
+            xCoordinate: data.xCoordinate,
+            yCoordinate: data.yCoordinate,
         };
     });
 

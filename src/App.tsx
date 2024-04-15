@@ -20,8 +20,8 @@ function App() {
 
       <Routes>
         <Route path="/" element={<MouthOverview />} />
-        <Route path='/select-zone' element={<MouthZoneSelector />} />
-        <Route path='/mouth-zone/:zone' element={<AddSoreView />} />
+        {/* <Route path='/select-zone' element={<MouthZoneSelector />} />
+        <Route path='/mouth-zone/:zone' element={<AddSoreView />} /> */}
         <Route path='/edit-sore/' element={<EditSoreView />} />
       </Routes>
 

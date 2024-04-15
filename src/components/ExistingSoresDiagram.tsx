@@ -6,34 +6,30 @@ import { handleAddSoreClick } from "../utilities/AddSoreClick";
 import { handleFindNearestSoreClick } from "../utilities/NearestSoreClick";
 
 interface ExistingSoresDiagramProps {
-    viewName: string;
     addMode: boolean;
     editMode: boolean;
     cankerSores: CankerSore[];
     selectedSore: CankerSore | null;
 }
 
-function ExistingSoresDiagram({ viewName, addMode, editMode, cankerSores, selectedSore }: ExistingSoresDiagramProps) {
+function ExistingSoresDiagram({ addMode, editMode, cankerSores }: ExistingSoresDiagramProps) {
     const imageRef = useRef<HTMLImageElement>(null);
     const [zoomed, setZoomed] = useState(false);
     const [offsetX, setOffsetX] = useState(0);
     const [offsetY, setOffsetY] = useState(0);
     const { setSelectedSore } = useCankerSores();
     const [ selectedZone, setSelectedZone ] = useState<string>("mouthDiagramNoLabels")
-    const [imageDimensions, setImageDimensions] = useState({ width: 512, height: 512 });
-
-
+    const [imageDimensions, setImageDimensions] = useState({ width: 0, height: 0 });
 
     const handleImageClick = (event: React.MouseEvent<HTMLImageElement, MouseEvent>) => {
-        if ((editMode || addMode) && !zoomed) {
+        if (addMode && !zoomed) {
             handleSelectMouthZoneClick(event);
-            setZoomed(true)
-
+            setZoomed(true);
         } else if (editMode && zoomed) {
         handleFindNearestSoreClick(event, cankerSores, setSelectedSore, imageRef);
-
+        console.log(cankerSores)
         } else if (addMode && zoomed) {
-            handleAddSoreClick(event, setSelectedSore)
+            handleAddSoreClick(event, selectedZone, setSelectedSore)
         }else {
             handleFindNearestSoreClick(event, cankerSores, setSelectedSore, imageRef);
         }
@@ -129,8 +125,10 @@ function ExistingSoresDiagram({ viewName, addMode, editMode, cankerSores, select
 
     useEffect(() => {
         if (editMode && selectedSore) {
+            setZoomed(true)
             zoomEditView(selectedSore.locationImage);
         } if (!addMode && !editMode) {
+            setZoomed(false)
             zoomEditView("mouthDiagramNoLabels") 
         }
     }, [editMode, addMode, selectedSore]);
@@ -142,7 +140,7 @@ function ExistingSoresDiagram({ viewName, addMode, editMode, cankerSores, select
         return () => {
             window.removeEventListener("resize", updateImageSize);
         };
-    }, [imageRef.current]);
+    }, []);
 
     const updateImageSize = () => {
         if (imageRef.current) {
@@ -153,12 +151,12 @@ function ExistingSoresDiagram({ viewName, addMode, editMode, cankerSores, select
         }
     };
 
-    const imageURL = `../assets/images/${viewName}.png`
+    const imageURL = `../assets/images/mouthDiagramNoLabels.png`
     
     return (
         <div className="existing-sores-diagram">
             <div className="mouth-image-container">
-                <img ref={imageRef} src={imageURL} alt={viewName} onLoad={updateImageSize} onClick={handleImageClick} 
+                <img ref={imageRef} src={imageURL} alt="Mouth Diagram" onLoad={updateImageSize} onClick={handleImageClick} 
                 style={{
                     cursor: 'pointer',
                     transition: 'transform 0.3s ease-out',
@@ -166,17 +164,12 @@ function ExistingSoresDiagram({ viewName, addMode, editMode, cankerSores, select
                     transformOrigin: `${50 - offsetX}% ${50 - offsetY}%` 
                 }}/>
                 {selectedSore && (
-                <SoreCircle id={selectedSore.id} x={selectedSore.xCoordinate ?? 0}
-                        y={selectedSore.yCoordinate ?? 0}  size={selectedSore.soreSize[0]} pain={selectedSore.painLevel[0]} selected={true}/>
+                <SoreCircle sore={selectedSore} imageDimensions={imageDimensions} selected={true}/>
             )}
                 {cankerSores.filter(sore => sore.id !== selectedSore?.id).map((sore) => (
                     <SoreCircle 
-                        key={sore.id} 
-                        id={sore.id} 
-                        x={ ((sore.xCoordinate ?? 1)) }
-                        y={ ((sore.yCoordinate ?? 1)) } 
-                        size={sore.soreSize[sore.soreSize.length - 1] ?? 1} 
-                        pain={sore.painLevel[sore.painLevel.length - 1] ?? 1} 
+                        sore={sore}
+                        imageDimensions={imageDimensions}
                         selected={sore.id === selectedSore?.id}
                     />
                 ))}
