@@ -83,7 +83,7 @@ const MouthOverview: React.FC = () => {
     async function finishEditingButtonHandler() {
         if (selectedSore) {
             try {
-                setSelectedSoreContext(null);
+                // setSelectedSoreContext(null);
                 setEditMode(false);
                 await saveSore(selectedSore);
                 fetchSores();

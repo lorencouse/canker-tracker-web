@@ -12,7 +12,7 @@ interface ExistingSoresDiagramProps {
     selectedSore: CankerSore | null;
 }
 
-function ExistingSoresDiagram({ addMode, editMode, cankerSores }: ExistingSoresDiagramProps) {
+function ExistingSoresDiagram({ addMode, editMode, cankerSores, selectedSore }: ExistingSoresDiagramProps) {
     const imageRef = useRef<HTMLImageElement>(null);
     const [zoomed, setZoomed] = useState(false);
     const [offsetX, setOffsetX] = useState(0);
@@ -164,13 +164,16 @@ function ExistingSoresDiagram({ addMode, editMode, cankerSores }: ExistingSoresD
                     transformOrigin: `${50 - offsetX}% ${50 - offsetY}%` 
                 }}/>
                 {selectedSore && (
-                <SoreCircle sore={selectedSore} imageDimensions={imageDimensions} selected={true}/>
+                <SoreCircle sore={selectedSore} imageDimensions={imageDimensions} selected={true} zoomed={zoomed} offsetX={offsetX} offsetY={offsetY}/>
             )}
                 {cankerSores.filter(sore => sore.id !== selectedSore?.id).map((sore) => (
                     <SoreCircle 
                         sore={sore}
                         imageDimensions={imageDimensions}
                         selected={sore.id === selectedSore?.id}
+                        zoomed={zoomed}
+                        offsetX={offsetX}
+                        offsetY={offsetY}
                     />
                 ))}
 
