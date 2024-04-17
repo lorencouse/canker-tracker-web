@@ -12,9 +12,8 @@ const SoreDetails: React.FC<SoreDetailsProps> = ({ sore }) => {
 
         <li>Last Updated: {sore.lastUpdated.join(', ')}</li>
         <li>Number of Days: {sore.numberOfDays}</li>
-        <li>
-          Location: {sore.locationImage} 
-        </li>
+        <li>Location: {sore.locationImage} </li>
+        <li>{`${sore.gums ? "On Gums" : "On Lips"}`} </li>
         <li>Sore Size: {sore.soreSize.join(', ')}</li>
         <li>Pain Level: {sore.painLevel.join(', ')}</li>
         

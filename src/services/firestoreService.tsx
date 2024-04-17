@@ -44,10 +44,9 @@ export const loadSores = async (viewName: string): Promise<CankerSore[]> => {
             lastUpdated,
             numberOfDays: data.numberOfDays,
             locationImage: data.locationImage,
+            gums: data.gums,
             soreSize: data.soreSize,
             painLevel: data.painLevel,
-            // xCoordinateZoomed: data.xCoordinateZoomed,
-            // yCoordinateZoomed: data.yCoordinateZoomed,
             xCoordinate: data.xCoordinate,
             yCoordinate: data.yCoordinate,
         };

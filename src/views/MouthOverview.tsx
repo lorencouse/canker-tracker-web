@@ -29,12 +29,13 @@ const MouthOverview: React.FC = () => {
     // Button Handlers
 
     function addButtonHandler() {
-        setAddMode(true)
+        setSelectedSoreContext(null);
+        setAddMode(true);
     }
 
     const editButtonHandler = () => {
         if (selectedSore) {
-            setEditMode(true)
+            setEditMode(true);
         } else {
             alert("Please select a sore to edit.");
         }
@@ -44,6 +45,7 @@ const MouthOverview: React.FC = () => {
         if (selectedSore) {
             try {
                 await saveSore(selectedSore);
+                fetchSores();
             } catch (error) {
                 console.error("Failed to save sore and navigate:", error);
             }
@@ -53,12 +55,16 @@ const MouthOverview: React.FC = () => {
     }
 
     async function deletedAllButtonHandler() {
+        const allCankerSores = cankerSores;
+        const selectedSoreBackup = selectedSore;
         if (window.confirm("Are you sure you want to delete all cankersores?")) {
             try {
-                await clearAllSores();
                 setCankerSores([])
                 setSelectedSoreContext(null)
+                await clearAllSores();
             } catch {
+                setCankerSores(allCankerSores)
+                setSelectedSoreContext(selectedSoreBackup)
                 console.error("Failed to clear", Error);
                 alert("Clear failed.  Check console for details.")
             }
@@ -115,12 +121,12 @@ const MouthOverview: React.FC = () => {
         <div className="mouth-overview">
             
             <ExistingSoresDiagram addMode={addMode} editMode={editMode} cankerSores={cankerSores} selectedSore={selectedSore}/>
+            <h1>{(addMode && !selectedSore) ? "Select a Location" : (addMode && selectedSore) ? `Sore on ${selectedSore.locationImage}` : editMode ? `Edit Mode${`: ${selectedSore?.locationImage ?? ""}`}` : "Select or Add a Sore"}</h1>
 
-            {selectedSore && !addMode && <SoreDetails sore={selectedSore} />}
 
-            {addMode && <h1>Select Sore Location</h1>}
 
-            {(editMode || addMode) && 
+
+            {(editMode || addMode) && selectedSore &&
             <SoreSliders 
                 soreSize={selectedSore ? selectedSore.soreSize[0] : 3}
                 setSoreSize={(size: number) => {
@@ -135,14 +141,20 @@ const MouthOverview: React.FC = () => {
             />
             }
 
+{/* Buttons for Add, Edit, Delete, Finish */}
             {addMode && ( <div className="add-sore-buttons">
-                <button onClick={ finishAddingButtonHandler }>Finish</button>
-                <button onClick={ addMoreButtonHandler }>Add More</button>
+                <button onClick={ finishAddingButtonHandler }>{selectedSore ? "Finish Adding" : "Go Back"}</button>
+                {selectedSore && <button onClick={ addMoreButtonHandler }>Add More</button>} 
             </div>)}
 
-            {!addMode && !editMode && ( <div className="overview-buttons">
+            {!addMode && !editMode && !selectedSore && ( <div className="overview-buttons">
                 <button onClick={ addButtonHandler }>Add</button>
+                <button onClick= { deletedAllButtonHandler }>Clear all</button>
+            </div> )}
+
+            {!addMode && !editMode && selectedSore && ( <div className="overview-buttons">
                 <button onClick={ editButtonHandler }>Edit</button>
+                <button onClick={ addButtonHandler }>Add</button>
                 <button onClick= { deletedAllButtonHandler }>Clear all</button>
             </div> )}
 
@@ -151,7 +163,7 @@ const MouthOverview: React.FC = () => {
                 <button onClick={ deleteSoreButtonHandler }>Delete</button>
             </div>)}
 
-
+            {selectedSore && !addMode && <SoreDetails sore={selectedSore} />}
 
 
         </div>

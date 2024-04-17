@@ -2,8 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import SoreCircle from "./SoreCircle";
 import { CankerSore } from "../types";
 import { useCankerSores } from '../context/CankerSoresContext'; 
-import { handleAddSoreClick } from "../utilities/AddSoreClick";
-import { handleFindNearestSoreClick } from "../utilities/NearestSoreClick";
+import { handleAddSoreClick, handleFindNearestSoreClick } from "../utilities/ClickHandlers";
 
 interface ExistingSoresDiagramProps {
     addMode: boolean;
@@ -16,10 +15,15 @@ function ExistingSoresDiagram({ addMode, editMode, cankerSores, selectedSore }: 
     const imageRef = useRef<HTMLImageElement>(null);
     const [zoomed, setZoomed] = useState(false);
     const [offsetX, setOffsetX] = useState(0);
-    const [offsetY, setOffsetY] = useState(0);
+    const [offsetY, setOffsetY] = useState(0);   
     const { setSelectedSore } = useCankerSores();
     const [ selectedZone, setSelectedZone ] = useState<string>("mouthDiagramNoLabels")
     const [imageDimensions, setImageDimensions] = useState({ width: 0, height: 0 });
+    const [toggleGums, setToggleGums] = useState(false);  
+    const imageName = toggleGums ? "GumsDiagram" : "mouthDiagramNoLabels";
+    const buttonLabel = toggleGums ? "Switch to Lips" : "Switch to Gums"; 
+    const imageURL: string = `../assets/images/${imageName}.png`
+
 
     const handleImageClick = (event: React.MouseEvent<HTMLImageElement, MouseEvent>) => {
         if (addMode && !zoomed) {
@@ -29,7 +33,7 @@ function ExistingSoresDiagram({ addMode, editMode, cankerSores, selectedSore }: 
         handleFindNearestSoreClick(event, cankerSores, setSelectedSore, imageRef);
         console.log(cankerSores)
         } else if (addMode && zoomed) {
-            handleAddSoreClick(event, selectedZone, setSelectedSore)
+            handleAddSoreClick(event, selectedZone, toggleGums, setSelectedSore)
         }else {
             handleFindNearestSoreClick(event, cankerSores, setSelectedSore, imageRef);
         }
@@ -45,29 +49,29 @@ function ExistingSoresDiagram({ addMode, editMode, cankerSores, selectedSore }: 
 
         if (y < rect.height / 2) {
             if (x < rect.width * 0.33) {
-                viewName = "leftCheek";
+                viewName = "Left Cheek";
                 localOffsetX = 50; 
                 localOffsetY = 50;
             } else if (x < rect.width * 0.66) {
-                viewName = "upperGums";
-                localOffsetX = 0;
+                viewName = "Upper Mouth";
+                localOffsetX = -2;
                 localOffsetY = 50;
             } else {
-                viewName = "rightCheek";
+                viewName = "Right Cheek";
                 localOffsetX = -50;
                 localOffsetY = 50;
             }
         } else {
             if (x < rect.width * 0.33) {
-                viewName = "lips";
+                viewName = "Left Jaw";
                 localOffsetX = 50;
                 localOffsetY = -50;
             } else if (x < rect.width * 0.66) {
-                viewName = "tongue";
-                localOffsetX = 0;
-                localOffsetY = -33;
+                viewName = "Lower Mouth";
+                localOffsetX = -3;
+                localOffsetY = -50;
             } else {
-                viewName = "lowerGums";
+                viewName = "Right Jaw";
                 localOffsetX = -50;
                 localOffsetY = -50;
             }
@@ -77,6 +81,7 @@ function ExistingSoresDiagram({ addMode, editMode, cankerSores, selectedSore }: 
         setOffsetX(localOffsetX);
         setOffsetY(localOffsetY);
         setZoomed(true); 
+
     };
 
     function zoomEditView(viewName: string) {
@@ -85,27 +90,27 @@ function ExistingSoresDiagram({ addMode, editMode, cankerSores, selectedSore }: 
         var localOffsetY = 0;
 
         switch(viewName) {
-            case "leftCheek":
+            case "Left Cheek":
                 localOffsetX = 50; 
                 localOffsetY = 50;
                 break;
-            case "upperGums":
-                localOffsetX = 0;
+            case "Upper Mouth":
+                localOffsetX = -2;
                 localOffsetY = 50;
                 break;
-            case "rightCheek":
+            case "Right Cheek":
                 localOffsetX = -50;
                 localOffsetY = 50;
                 break;
-            case "lips":
+            case "Left Jaw":
                 localOffsetX = 50;
                 localOffsetY = -50;
                 break;
-            case "tongue":
-                localOffsetX = 0;
-                localOffsetY = -33;
+            case "Lower Mouth":
+                localOffsetX = -3;
+                localOffsetY = -50;
                 break;
-            case "lowerGums":
+            case "Right Jaw":
                 localOffsetX = -50;
                 localOffsetY = -50;
                 break;
@@ -123,13 +128,25 @@ function ExistingSoresDiagram({ addMode, editMode, cankerSores, selectedSore }: 
         setZoomed( viewName === "mouthDiagramNoLabels" ? false : true); 
     };
 
+    const handleGumsMode = () => {
+        const newGumsVal = !toggleGums;
+        setToggleGums(newGumsVal);
+
+        if (selectedSore !== null) {
+        let updatedSore = { ...selectedSore, gums:newGumsVal }
+        setSelectedSore(updatedSore);
+        } 
+    }
+
     useEffect(() => {
         if (editMode && selectedSore) {
-            setZoomed(true)
+            setToggleGums(selectedSore.gums);
             zoomEditView(selectedSore.locationImage);
         } if (!addMode && !editMode) {
             setZoomed(false)
-            zoomEditView("mouthDiagramNoLabels") 
+            zoomEditView("mouthDiagramNoLabels");
+            setSelectedZone("mouthDiagramNoLabels");
+            setToggleGums(false); 
         }
     }, [editMode, addMode, selectedSore]);
     
@@ -151,7 +168,6 @@ function ExistingSoresDiagram({ addMode, editMode, cankerSores, selectedSore }: 
         }
     };
 
-    const imageURL = `../assets/images/mouthDiagramNoLabels.png`
     
     return (
         <div className="existing-sores-diagram">
@@ -178,6 +194,7 @@ function ExistingSoresDiagram({ addMode, editMode, cankerSores, selectedSore }: 
                 ))}
 
             </div>
+            {addMode && zoomed && <button onClick={ handleGumsMode }>{buttonLabel}</button>}
 
         </div>
     )

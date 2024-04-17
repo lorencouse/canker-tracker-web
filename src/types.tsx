@@ -3,10 +3,9 @@ export interface CankerSore {
     lastUpdated: Date[];
     numberOfDays: number;
     locationImage: string;
+    gums: boolean;
     soreSize: number[];
     painLevel: number[];
-    // xCoordinateZoomed?: number;
-    // yCoordinateZoomed?: number;
     xCoordinate?: number;
     yCoordinate?: number;
 }
