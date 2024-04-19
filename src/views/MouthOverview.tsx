@@ -7,14 +7,14 @@ import { loadSores, clearAllSores, deleteSore } from "../services/firestoreServi
 import SoreDetails from "../components/SoreDetails";
 import SoreSliders from "../components/SoreSliders";
 import { saveSore } from '../services/firestoreService'; 
-
+import { Filters, FilterBy } from "../components/Filters";
 
 const MouthOverview: React.FC = () => {
     const [addMode, setAddMode] = useState<boolean>(false)
     const [editMode, setEditMode] = useState<boolean>(false)
-    const { selectedSore } = useCankerSores(); 
-    const { setSelectedSore: setSelectedSoreContext } = useCankerSores();
+    const { selectedSore, setSelectedSore: setSelectedSore } = useCankerSores();
     const [cankerSores, setCankerSores] = useState<CankerSore[]>([]); 
+    const [filterBy, setFilterBy] = useState<FilterBy>({});
 
     const fetchSores = async () => {
         try {
@@ -25,11 +25,15 @@ const MouthOverview: React.FC = () => {
             }
     };
 
+    useEffect(() => {
+        fetchSores();
+    }, []);
+
 
     // Button Handlers
 
     function addButtonHandler() {
-        setSelectedSoreContext(null);
+        setSelectedSore(null);
         setAddMode(true);
     }
 
@@ -60,11 +64,11 @@ const MouthOverview: React.FC = () => {
         if (window.confirm("Are you sure you want to delete all cankersores?")) {
             try {
                 setCankerSores([])
-                setSelectedSoreContext(null)
+                setSelectedSore(null)
                 await clearAllSores();
             } catch {
                 setCankerSores(allCankerSores)
-                setSelectedSoreContext(selectedSoreBackup)
+                setSelectedSore(selectedSoreBackup)
                 console.error("Failed to clear", Error);
                 alert("Clear failed.  Check console for details.")
             }
@@ -74,7 +78,6 @@ const MouthOverview: React.FC = () => {
     async function finishAddingButtonHandler() {
         if (selectedSore) {
             try {
-                setSelectedSoreContext(null)
                 setAddMode(false);
                 await saveSore(selectedSore);
                 fetchSores();
@@ -89,7 +92,6 @@ const MouthOverview: React.FC = () => {
     async function finishEditingButtonHandler() {
         if (selectedSore) {
             try {
-                // setSelectedSoreContext(null);
                 setEditMode(false);
                 await saveSore(selectedSore);
                 fetchSores();
@@ -105,7 +107,7 @@ const MouthOverview: React.FC = () => {
         if (selectedSore) {
             try {
                 await deleteSore(selectedSore.id);
-                setSelectedSoreContext(null);
+                setSelectedSore(null);
                 fetchSores();
             } catch (error) {
                 console.error("Failed to delete sore: ", error)
@@ -124,19 +126,17 @@ const MouthOverview: React.FC = () => {
             <h1>{(addMode && !selectedSore) ? "Select a Location" : (addMode && selectedSore) ? `Sore on ${selectedSore.locationImage}` : editMode ? `Edit Mode${`: ${selectedSore?.locationImage ?? ""}`}` : "Select or Add a Sore"}</h1>
 
 
-
-
             {(editMode || addMode) && selectedSore &&
             <SoreSliders 
                 soreSize={selectedSore ? selectedSore.soreSize[0] : 3}
                 setSoreSize={(size: number) => {
                     const newSore = selectedSore ? { ...selectedSore, soreSize: [size] } : null;
-                    setSelectedSoreContext(newSore);
+                    setSelectedSore(newSore);
                 }}
                 painLevel={selectedSore ? selectedSore.painLevel[0] : 3} 
                 setPainLevel={(level: number) => {
                     const newSore = selectedSore ? { ...selectedSore, painLevel: [level] } : null;
-                    setSelectedSoreContext(newSore);
+                    setSelectedSore(newSore);
                 }}
             />
             }
@@ -149,13 +149,14 @@ const MouthOverview: React.FC = () => {
 
             {!addMode && !editMode && !selectedSore && ( <div className="overview-buttons">
                 <button onClick={ addButtonHandler }>Add</button>
-                <button onClick= { deletedAllButtonHandler }>Clear all</button>
+                <button onClick= { deletedAllButtonHandler }>Delete all</button>
             </div> )}
 
             {!addMode && !editMode && selectedSore && ( <div className="overview-buttons">
                 <button onClick={ editButtonHandler }>Edit</button>
                 <button onClick={ addButtonHandler }>Add</button>
-                <button onClick= { deletedAllButtonHandler }>Clear all</button>
+                <button onClick= { deletedAllButtonHandler }>Delete all</button>
+                <Filters filterBy={filterBy} setFilterBy={setFilterBy} />
             </div> )}
 
             {editMode && ( <div className="edit-sore-buttons">

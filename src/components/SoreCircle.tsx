@@ -13,7 +13,7 @@ interface SoreCircleProps {
 
 const getColor = (step: number) => {
     const value = step * 28;
-    return `rgb(${value}, ${255 - value}, ${255 - value})`;
+    return `rgb(${value}, ${255 - value}, ${255 - value}`;
 };
 
 const SoreCircle: React.FC<SoreCircleProps> = React.memo(({ sore, imageDimensions, selected, zoomed, offsetX, offsetY }) => {
@@ -33,8 +33,9 @@ const SoreCircle: React.FC<SoreCircleProps> = React.memo(({ sore, imageDimension
                 top: `${zoomed ? (yPercent + (offsetY - 50)) : yPercent}%`, 
                 width: `${size}px`,
                 height: `${size}px`,
-                backgroundColor: getColor(painLevel[painLevel.length-1]),
+                backgroundColor: `${getColor(painLevel[painLevel.length-1])}, ${selected ? "1" : "0.5)"}`,
                 border: selected ? "2px solid blue" : "1px solid white",
+                // opacity: selected ? "100%" : "20%"
             }}
         ></div>
     );

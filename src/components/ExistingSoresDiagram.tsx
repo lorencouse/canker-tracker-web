@@ -147,6 +147,8 @@ function ExistingSoresDiagram({ addMode, editMode, cankerSores, selectedSore }: 
             zoomEditView("mouthDiagramNoLabels");
             setSelectedZone("mouthDiagramNoLabels");
             setToggleGums(false); 
+        } if (selectedSore?.gums) {
+            setToggleGums(true);
         }
     }, [editMode, addMode, selectedSore]);
     
