@@ -27,13 +27,14 @@ const MouthOverview: React.FC = () => {
             }
     };
 
-    const filterSores = () => {
-        
-    }
 
     useEffect(() => {
         fetchSores();
     }, []);
+
+    const filterSores = (cankerSores: CankerSore[], filterBy: FilterBy, filterdSores: CankerSore[], setFilteredSores: () => void) => {
+        
+    }
 
 
     // Button Handlers
@@ -42,14 +43,6 @@ const MouthOverview: React.FC = () => {
         setSelectedSore(null);
         setAddMode(true);
     }
-
-    const editButtonHandler = () => {
-        if (selectedSore) {
-            setEditMode(true);
-        } else {
-            alert("Please select a sore to edit.");
-        }
-    };
 
     async function addMoreButtonHandler() {
         if (selectedSore) {
@@ -62,6 +55,57 @@ const MouthOverview: React.FC = () => {
         } else {
             alert("Please click image to select sore location.")
         }
+    }
+
+    const editButtonHandler = () => {
+        if (selectedSore) {
+            setEditMode(true);
+        } else {
+            alert("Please select a sore to edit.");
+        }
+    };
+
+    async function finishEditingButtonHandler() {
+        if (selectedSore) {
+            try {
+                setEditMode(false);
+                await saveSore(selectedSore);
+                fetchSores();
+            } catch (error) {
+                console.error("Failed to update:", error);
+            }
+        } else {
+                setEditMode(false)
+        }
+    }
+
+    async function finishAddingButtonHandler() {
+        if (selectedSore) {
+            try {
+                setAddMode(false);
+                await saveSore(selectedSore);
+                fetchSores();
+            } catch (error) {
+                console.error("Failed to finish adding:", error);
+            }
+        } else {
+                setAddMode(false);
+        }
+    }
+
+    async function deleteSoreButtonHandler() {
+        if (selectedSore) {
+            try {
+                await deleteSore(selectedSore.id);
+                setSelectedSore(null);
+                fetchSores();
+            } catch (error) {
+                console.error("Failed to delete sore: ", error)
+            } 
+        } else {
+                alert("Please select a sore to delete.")
+            }
+        
     }
 
     async function deletedAllButtonHandler() {
@@ -81,49 +125,6 @@ const MouthOverview: React.FC = () => {
         }
     }
 
-    async function finishAddingButtonHandler() {
-        if (selectedSore) {
-            try {
-                setAddMode(false);
-                await saveSore(selectedSore);
-                fetchSores();
-            } catch (error) {
-                console.error("Failed to finish adding:", error);
-            }
-        } else {
-                setAddMode(false);
-        }
-    }
-
-    async function finishEditingButtonHandler() {
-        if (selectedSore) {
-            try {
-                setEditMode(false);
-                await saveSore(selectedSore);
-                fetchSores();
-            } catch (error) {
-                console.error("Failed to update:", error);
-            }
-        } else {
-                setEditMode(false)
-        }
-    }
-
-    async function deleteSoreButtonHandler() {
-        if (selectedSore) {
-            try {
-                await deleteSore(selectedSore.id);
-                setSelectedSore(null);
-                fetchSores();
-            } catch (error) {
-                console.error("Failed to delete sore: ", error)
-            } 
-        } else {
-                alert("Please select a sore to delete.")
-            }
-        
-    }
-
     const setSoreZone = (newZone: string) => {
         if (selectedSore) {
     let newSore = {...selectedSore, zone: newZone};
@@ -138,6 +139,7 @@ const MouthOverview: React.FC = () => {
             <SoreDiagram addMode={addMode} editMode={editMode} cankerSores={cankerSores} selectedSore={selectedSore}/>
             <h1>{(addMode && !selectedSore) ? "Select a Location" : (addMode && selectedSore) ? `Sore on ${selectedSore.zone}` : editMode ? `Edit Mode${`: ${selectedSore?.zone ?? ""}`}` : "Select or Add a Sore"}</h1>
 
+            <Filters />
 
             {(editMode || addMode) && selectedSore && (
             <div className="sore-editor-controls">    
@@ -157,7 +159,7 @@ const MouthOverview: React.FC = () => {
             <ZoneSelector onChange={ setSoreZone } zone={selectedSore.zone}/> </div> )
             }
 
-{/* Buttons for Add, Edit, Delete, Finish */}
+    {/* Buttons for Add, Edit, Delete, Finish */}
             {addMode && ( <div className="add-sore-buttons">
                 <button onClick={ finishAddingButtonHandler }>{selectedSore ? "Finish Adding" : "Go Back"}</button>
                 {selectedSore && <button onClick={ addMoreButtonHandler }>Add More</button>} 

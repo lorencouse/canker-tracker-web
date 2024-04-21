@@ -14,7 +14,7 @@ interface SoreDiagramProps {
 
 function SoreDiagram({ addMode, editMode, cankerSores, selectedSore }: SoreDiagramProps) {
     const imageRef = useRef<HTMLImageElement>(null);
-    const [zoomed, setZoomed] = useState(false);
+    const [zoomed, setZoomed] = useState<number>(1);
     const [offsetX, setOffsetX] = useState(0);
     const [offsetY, setOffsetY] = useState(0);   
     const { setSelectedSore } = useCankerSores();
@@ -27,13 +27,13 @@ function SoreDiagram({ addMode, editMode, cankerSores, selectedSore }: SoreDiagr
 
 
     const handleImageClick = (event: React.MouseEvent<HTMLImageElement, MouseEvent>) => {
-        if (addMode && !zoomed) {
+        if (addMode && zoomed === 1) {
             handleSelectMouthZoneClick(event);
-            setZoomed(true);
-        } else if (editMode && zoomed) {
+            setZoomed(2);
+        } else if (editMode && zoomed !== 1) {
         handleFindNearestSoreClick(event, cankerSores, setSelectedSore, imageRef);
         console.log(cankerSores)
-        } else if (addMode && zoomed) {
+        } else if (addMode && zoomed !== 1) {
             handleAddSoreClick(event, selectedZone, toggleGums, setSelectedSore)
         }else {
             handleFindNearestSoreClick(event, cankerSores, setSelectedSore, imageRef);
@@ -45,99 +45,40 @@ function SoreDiagram({ addMode, editMode, cankerSores, selectedSore }: SoreDiagr
         const x = event.clientX - rect.left; 
         const y = event.clientY - rect.top;
         var viewName = "";
-        var localOffsetX = 0;
-        var localOffsetY = 0;
+        const xPercent = x/rect.width;
+        const yPercent = y/rect.height;
 
         if (y < rect.height / 2) {
             if (x < rect.width * 0.33) {
                 viewName = "Left Cheek";
-                localOffsetX = 50; 
-                localOffsetY = 50;
             } else if (x < rect.width * 0.66) {
                 viewName = "Upper Mouth";
-                localOffsetX = -2;
-                localOffsetY = 50;
             } else {
                 viewName = "Right Cheek";
-                localOffsetX = -50;
-                localOffsetY = 50;
             }
         } else {
             if (x < rect.width * 0.33) {
                 viewName = "Left Jaw";
-                localOffsetX = 50;
-                localOffsetY = -50;
             } else if (x < rect.width * 0.66) {
                 viewName = "Lower Mouth";
-                localOffsetX = -3;
-                localOffsetY = -50;
             } else {
                 viewName = "Right Jaw";
-                localOffsetX = -50;
-                localOffsetY = -50;
             }
         }
 
         setSelectedZone(viewName)
-        setOffsetX(localOffsetX);
-        setOffsetY(localOffsetY);
-        setZoomed(true); 
-
+        zoomToSore(xPercent, yPercent);
+        setZoomed(2); 
     };
-
-    // function zoomEditView(viewName: string) {
-
-    //     var localOffsetX = 0;
-    //     var localOffsetY = 0;
-
-    //     switch(viewName) {
-    //         case "Left Cheek":
-    //             localOffsetX = 50; 
-    //             localOffsetY = 50;
-    //             break;
-    //         case "Upper Mouth":
-    //             localOffsetX = -2;
-    //             localOffsetY = 50;
-    //             break;
-    //         case "Right Cheek":
-    //             localOffsetX = -50;
-    //             localOffsetY = 50;
-    //             break;
-    //         case "Left Jaw":
-    //             localOffsetX = 50;
-    //             localOffsetY = -50;
-    //             break;
-    //         case "Lower Mouth":
-    //             localOffsetX = -3;
-    //             localOffsetY = -50;
-    //             break;
-    //         case "Right Jaw":
-    //             localOffsetX = -50;
-    //             localOffsetY = -50;
-    //             break;
-    //         case "mouthDiagramNoLabels":
-    //             localOffsetX = 0;
-    //             localOffsetY = 0;
-    //             break;
-    //         default:
-    //             return;
-
-    //     }
-
-    //     setOffsetX(localOffsetX);
-    //     setOffsetY(localOffsetY);
-    //     setZoomed( viewName === "mouthDiagramNoLabels" ? false : true); 
-    // };
 
     function zoomToSore(x: number, y: number) {
         let xPercent = x * 100;
         let yPercent = y * 100;
-        let newOffsetX = (xPercent - 50) * -2;
-        let newOffsetY = (yPercent - 50) * -2;
+        let newOffsetX = (xPercent - 50) * -zoomed;
+        let newOffsetY = (yPercent - 50) * -zoomed;
  
         setOffsetX(newOffsetX)
         setOffsetY(newOffsetY)
-        // setZoomed(zoomed)
     }
 
     const handleGumsMode = () => {
@@ -153,10 +94,10 @@ function SoreDiagram({ addMode, editMode, cankerSores, selectedSore }: SoreDiagr
     useEffect(() => {
         if (editMode && selectedSore) {
             setToggleGums(selectedSore.gums);
-            setZoomed(true);
+            setZoomed(2);
             zoomToSore(selectedSore.xCoordinate || 0, selectedSore.yCoordinate || 0);
         } if (!addMode && !editMode) {
-            setZoomed(false);
+            setZoomed(1);
             setToggleGums(false); 
             zoomToSore(0,0);
         } if (selectedSore?.gums) {
@@ -181,9 +122,6 @@ function SoreDiagram({ addMode, editMode, cankerSores, selectedSore }: SoreDiagr
             });
         }
     };
-
-
-
     
     return (
         <div className="existing-sores-diagram">
@@ -192,7 +130,7 @@ function SoreDiagram({ addMode, editMode, cankerSores, selectedSore }: SoreDiagr
                 style={{
                     cursor: 'pointer',
                     transition: 'transform 0.3s ease-out',
-                    transform: zoomed ? 'scale(2)' : 'scale(1)', 
+                    transform: `scale(${zoomed})`, 
                     transformOrigin: `${50 - offsetX}% ${50 - offsetY}%` 
                 }}/>
                 {selectedSore && (
@@ -210,7 +148,7 @@ function SoreDiagram({ addMode, editMode, cankerSores, selectedSore }: SoreDiagr
                 ))}
 
             </div>
-            { zoomed && <button onClick={ handleGumsMode }>{buttonLabel}</button>}
+            { zoomed !== 0 && <button onClick={ handleGumsMode }>{buttonLabel}</button>}
 
         </div>
     )
