@@ -49,7 +49,7 @@ export const handleAddSoreClick = (
       id: uuidv4(),
       lastUpdated: [new Date()],
       numberOfDays: 1,
-      locationImage: viewName,
+      zone: viewName,
       gums: gums,
       soreSize: [3], 
       painLevel: [3], 

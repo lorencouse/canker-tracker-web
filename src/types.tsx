@@ -2,7 +2,7 @@ export interface CankerSore {
     id: string;
     lastUpdated: Date[];
     numberOfDays: number;
-    locationImage: string;
+    zone: string;
     gums: boolean;
     soreSize: number[];
     painLevel: number[];
