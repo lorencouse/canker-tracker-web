@@ -43,10 +43,10 @@ export const handleAddSoreClick = (
 
   const xScaled = (xVal / rect.width);
   const yScaled = (yVal / rect.height);
-  console.log(`X: ${xScaled} y:${yScaled}`)
-
+  
   const newSelectedSore: CankerSore = {
       id: uuidv4(),
+      active: true,
       lastUpdated: [new Date()],
       numberOfDays: 1,
       zone: viewName,
@@ -59,4 +59,42 @@ export const handleAddSoreClick = (
   
   setSelectedSore(newSelectedSore);
 };
+
+  export const handleSelectMouthZoneClick = (
+    event: React.MouseEvent<HTMLImageElement, MouseEvent>, 
+    setSelectedZone: (zone: string | "") => void, 
+    setZoomed: (zoomed: number) => void, 
+    zoomToSore: (x: number, y: number) => void 
+    ) => {
+      const rect = event.currentTarget.getBoundingClientRect();
+        const x = event.clientX - rect.left; 
+        const y = event.clientY - rect.top;
+        var viewName = "";
+        const xPercent = x/rect.width;
+        const yPercent = y/rect.height;
+
+        if (y < rect.height / 2) {
+            if (x < rect.width * 0.33) {
+                viewName = "Left Cheek";
+            } else if (x < rect.width * 0.66) {
+                viewName = "Upper Mouth";
+            } else {
+                viewName = "Right Cheek";
+            }
+        } else {
+            if (x < rect.width * 0.33) {
+                viewName = "Left Jaw";
+            } else if (x < rect.width * 0.66) {
+                viewName = "Lower Mouth";
+            } else {
+                viewName = "Right Jaw";
+            }
+        }
+
+        setSelectedZone(viewName)
+        zoomToSore(xPercent, yPercent);
+        setZoomed(2); 
+    };
+
+
 

@@ -1,22 +1,24 @@
 import React, { useState, useEffect } from "react";
 import "./MouthImage.css";
-import SoreDiagram from "../components/SoreDiagram";
+import SoreDiagram from "../components/Sore/SoreDiagram";
 import { CankerSore } from "../types";
 import { useCankerSores } from "../context/CankerSoresContext";
-import { loadSores, clearAllSores, deleteSore } from "../services/firestoreService";
-import SoreDetails from "../components/SoreDetails";
+import { loadSores, clearAllSores, deleteSore, saveSore, saveData } from "../services/firestoreService";
+import SoreDetails from "../components/Sore/SoreDetails";
 import SoreSliders from "../components/SoreSliders";
-import { saveSore } from '../services/firestoreService'; 
 import { Filters, FilterBy } from "../components/Filters";
 import { ZoneSelector } from "../components/ZoneSelector";
+import { useNavigate } from "react-router-dom";
+import Button from "../components/Button";
 
 const MouthOverview: React.FC = () => {
-    const [addMode, setAddMode] = useState<boolean>(false)
-    const [editMode, setEditMode] = useState<boolean>(false)
+    const [addMode, setAddMode] = useState<boolean>(false);
+    const [editMode, setEditMode] = useState<boolean>(false);
     const { selectedSore, setSelectedSore } = useCankerSores();
     const [cankerSores, setCankerSores] = useState<CankerSore[]>([]); 
     const [filterBy, setFilterBy] = useState<FilterBy>({});
-    const [filterdSores, setFilteredSores] = useState<CankerSore[]>(cankerSores)
+    const [unfilterdSores, setUnfilteredSores] = useState<CankerSore[]>(cankerSores);
+    const navigate = useNavigate();
 
     const fetchSores = async () => {
         try {
@@ -27,15 +29,9 @@ const MouthOverview: React.FC = () => {
             }
     };
 
-
     useEffect(() => {
         fetchSores();
     }, []);
-
-    const filterSores = (cankerSores: CankerSore[], filterBy: FilterBy, filterdSores: CankerSore[], setFilteredSores: () => void) => {
-        
-    }
-
 
     // Button Handlers
 
@@ -83,7 +79,8 @@ const MouthOverview: React.FC = () => {
         if (selectedSore) {
             try {
                 setAddMode(false);
-                await saveSore(selectedSore);
+                // await saveSore(selectedSore);
+                await saveData("cankerSores", selectedSore.id, selectedSore)
                 fetchSores();
             } catch (error) {
                 console.error("Failed to finish adding:", error);
@@ -132,14 +129,13 @@ const MouthOverview: React.FC = () => {
         }
     }
 
-
     return (
         <div className="mouth-overview">
             
             <SoreDiagram addMode={addMode} editMode={editMode} cankerSores={cankerSores} selectedSore={selectedSore}/>
             <h1>{(addMode && !selectedSore) ? "Select a Location" : (addMode && selectedSore) ? `Sore on ${selectedSore.zone}` : editMode ? `Edit Mode${`: ${selectedSore?.zone ?? ""}`}` : "Select or Add a Sore"}</h1>
 
-            <Filters />
+            {/* <Filters /> */}
 
             {(editMode || addMode) && selectedSore && (
             <div className="sore-editor-controls">    
@@ -160,28 +156,38 @@ const MouthOverview: React.FC = () => {
             }
 
     {/* Buttons for Add, Edit, Delete, Finish */}
-            {addMode && ( <div className="add-sore-buttons">
-                <button onClick={ finishAddingButtonHandler }>{selectedSore ? "Finish Adding" : "Go Back"}</button>
-                {selectedSore && <button onClick={ addMoreButtonHandler }>Add More</button>} 
-            </div>)}
+{addMode && (
+    <div className="add-sore-buttons">
+        <Button label={selectedSore ? "Finish Adding" : "Go Back"} action={finishAddingButtonHandler} />
+        {selectedSore && <Button label={"Add More"} action={addMoreButtonHandler} />}
+    </div>
+)}
 
-            {!addMode && !editMode && !selectedSore && ( <div className="overview-buttons">
-                <button onClick={ addButtonHandler }>Add</button>
-                <button onClick= { deletedAllButtonHandler }>Delete all</button>
-            </div> )}
+{!addMode && !editMode && !selectedSore && (
+    <div className="overview-buttons">
+        <Button label={"Add"} action={addButtonHandler} />
+        <Button label={"Delete all"} action={deletedAllButtonHandler} />
+        <Button label={"Daily Log"} action={() => navigate("daily-log")} />
+    </div>
+)}
 
-            {!addMode && !editMode && selectedSore && ( <div className="overview-buttons">
-                <button onClick={ addButtonHandler }>Add</button>
-                <button onClick={ editButtonHandler }>Edit</button>
-                <button onClick={ deleteSoreButtonHandler }>Delete</button>
-                <button onClick= { deletedAllButtonHandler }>Delete all</button>
-                <Filters filterBy={filterBy} setFilterBy={setFilterBy} />
-            </div> )}
+{!addMode && !editMode && selectedSore && (
+    <div className="overview-buttons">
+        <Button label={"Add"} action={addButtonHandler} />
+        <Button label={"Edit"} action={editButtonHandler} />
+        <Button label={"Delete"} action={deleteSoreButtonHandler} />
+        <Button label={"Delete all"} action={deletedAllButtonHandler} />
+        <Filters filterBy={filterBy} setFilterBy={setFilterBy} cankerSores={unfilterdSores} setCankerSores={setCankerSores} />
+    </div>
+)}
 
-            {editMode && ( <div className="edit-sore-buttons">
-                <button onClick={ finishEditingButtonHandler }>Finish</button>
-                <button onClick={ deleteSoreButtonHandler }>Delete</button>
-            </div>)}
+{editMode && (
+    <div className="edit-sore-buttons">
+        <Button label={"Finish"} action={finishEditingButtonHandler} />
+        <Button label={"Delete"} action={deleteSoreButtonHandler} />
+    </div>
+)}
+
 
             {selectedSore && !addMode && <SoreDetails sore={selectedSore} onDelete={deleteSoreButtonHandler} />}
 

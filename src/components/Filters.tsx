@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { CankerSore } from "../types";
 import { ZoneSelector } from "./ZoneSelector";
 
 
@@ -11,40 +12,70 @@ export interface FilterBy {
 
 interface FilterByProps {
     
-    filterBy?: {
-        zone?: string;
-        active?: boolean;
-        gums?: boolean;
-        date?: Date;
-    };
-    setFilterBy: (filter: any) => void; 
+    filterBy?: FilterBy;
+    setFilterBy: (filter: FilterBy) => void; 
+    cankerSores: CankerSore[];
+    setCankerSores: (sores: CankerSore[]) => void;
 };
 
-export const Filters: React.FC<FilterByProps> = ({ filterBy, setFilterBy }) => {
+export const Filters: React.FC<FilterByProps> = ({ filterBy, setFilterBy, cankerSores, setCankerSores }) => {
     const [zone, setZone] = useState<string>(filterBy?.zone || '');
     const [active, setActive] = useState<boolean>(filterBy?.active || false);
     const [gums, setGums] = useState<boolean>(filterBy?.gums || false);
     const [date, setDate] = useState<Date | undefined>(filterBy?.date);
+    
+
+
+    useEffect(() => {
+        filterSores();
+    }, [filterBy]);
+
+    const filterSores = () => {
+        if (filterBy) {
+                    let filteredSores = cankerSores;
+                    if (filterBy.zone) {
+                        filteredSores = filteredSores.filter(sore => sore.zone === filterBy.zone);
+                    }
+                    if (typeof filterBy.active === 'boolean') {
+                        filteredSores = filteredSores.filter(sore => sore.active === filterBy.active);
+                    }
+                    if (typeof filterBy.gums === 'boolean') {
+                        filteredSores = filteredSores.filter(sore => sore.gums === filterBy.gums);
+                    }
+                    if (filterBy.date) {
+                        const filterDate = new Date(filterBy.date).setHours(0, 0, 0, 0);
+                        filteredSores = filteredSores.filter(sore => {
+                            const soreDate = new Date(sore.lastUpdated[sore.lastUpdated.length - 1]).setHours(0, 0, 0, 0);
+                            return soreDate === filterDate;
+                        });
+                    }
+                    setCankerSores(filteredSores);
+        }
+    };
 
     const handleZoneChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         setZone(e.target.value);
         setFilterBy({ ...filterBy, zone: e.target.value });
+        filterSores();
     };
 
     const handleActiveChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setActive(e.target.checked);
         setFilterBy({ ...filterBy, active: e.target.checked });
+        filterSores();
     };
 
     const handleGumsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setGums(e.target.checked);
         setFilterBy({ ...filterBy, gums: e.target.checked });
+        filterSores();
     };
 
     const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newDate = e.target.valueAsDate || undefined;
         setDate(newDate);
         setFilterBy({ ...filterBy, date: newDate });
+        filterSores();
     };
 
     return (

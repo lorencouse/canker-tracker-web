@@ -1,9 +1,10 @@
 import React, { useEffect, useState, useRef } from "react";
 import SoreCircle from "./SoreCircle";
-import { CankerSore } from "../types";
-import { useCankerSores } from '../context/CankerSoresContext'; 
-import { handleAddSoreClick, handleFindNearestSoreClick } from "../utilities/ClickHandlers";
+import { CankerSore } from "../../types";
+import { useCankerSores } from '../../context/CankerSoresContext'; 
+import { handleAddSoreClick, handleFindNearestSoreClick, handleSelectMouthZoneClick } from "../../utilities/ClickHandlers";
 import { off } from "process";
+import Button from "../Button";
 
 interface SoreDiagramProps {
     addMode: boolean;
@@ -22,13 +23,13 @@ function SoreDiagram({ addMode, editMode, cankerSores, selectedSore }: SoreDiagr
     const [imageDimensions, setImageDimensions] = useState({ width: 0, height: 0 });
     const [toggleGums, setToggleGums] = useState(false);  
     const imageName = toggleGums ? "GumsDiagram" : "mouthDiagramNoLabels";
-    const buttonLabel = toggleGums ? "Switch to Lips" : "Switch to Gums"; 
+    const buttonLabel = toggleGums ? "Switch to Mouth" : "Switch to Gums"; 
     const imageURL: string = `../assets/images/${imageName}.png`
 
 
     const handleImageClick = (event: React.MouseEvent<HTMLImageElement, MouseEvent>) => {
         if (addMode && zoomed === 1) {
-            handleSelectMouthZoneClick(event);
+            handleSelectMouthZoneClick(event, setSelectedZone, setZoomed, zoomToSore);
             setZoomed(2);
         } else if (editMode && zoomed !== 1) {
         handleFindNearestSoreClick(event, cankerSores, setSelectedSore, imageRef);
@@ -38,37 +39,6 @@ function SoreDiagram({ addMode, editMode, cankerSores, selectedSore }: SoreDiagr
         }else {
             handleFindNearestSoreClick(event, cankerSores, setSelectedSore, imageRef);
         }
-    };
-
-    const handleSelectMouthZoneClick = (event: React.MouseEvent<HTMLImageElement, MouseEvent>) => {
-      const rect = event.currentTarget.getBoundingClientRect();
-        const x = event.clientX - rect.left; 
-        const y = event.clientY - rect.top;
-        var viewName = "";
-        const xPercent = x/rect.width;
-        const yPercent = y/rect.height;
-
-        if (y < rect.height / 2) {
-            if (x < rect.width * 0.33) {
-                viewName = "Left Cheek";
-            } else if (x < rect.width * 0.66) {
-                viewName = "Upper Mouth";
-            } else {
-                viewName = "Right Cheek";
-            }
-        } else {
-            if (x < rect.width * 0.33) {
-                viewName = "Left Jaw";
-            } else if (x < rect.width * 0.66) {
-                viewName = "Lower Mouth";
-            } else {
-                viewName = "Right Jaw";
-            }
-        }
-
-        setSelectedZone(viewName)
-        zoomToSore(xPercent, yPercent);
-        setZoomed(2); 
     };
 
     function zoomToSore(x: number, y: number) {
@@ -148,7 +118,7 @@ function SoreDiagram({ addMode, editMode, cankerSores, selectedSore }: SoreDiagr
                 ))}
 
             </div>
-            { zoomed !== 0 && <button onClick={ handleGumsMode }>{buttonLabel}</button>}
+            { zoomed !== 0 && <Button label={buttonLabel} action={ handleGumsMode} />}
 
         </div>
     )

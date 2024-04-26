@@ -1,6 +1,6 @@
 import React from "react";
-import { CankerSore } from "../types";
-import { useCankerSores } from "../context/CankerSoresContext";
+import { CankerSore } from "../../types";
+import { useCankerSores } from "../../context/CankerSoresContext";
 
 interface SoreCircleProps {
     sore: CankerSore;

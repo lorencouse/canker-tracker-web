@@ -1,15 +1,25 @@
 import { db } from '../firebaseConfig';
-import { collection, addDoc, getDocs, writeBatch, deleteDoc, doc, setDoc, query, where } from 'firebase/firestore';
-import { CankerSore } from '../types';
+import { collection, addDoc, getDocs, setDoc, deleteDoc, doc, writeBatch, query, where, FirestoreError } from 'firebase/firestore';
+import { CankerSore, DailyLog } from '../types';
 
-export const saveData = async (collectionName: string, data: Record<string, any>) => {
+// export const saveData = async (collectionName: string, data: Record<string, any>) => {
+//   try {
+//     const docRef = await addDoc(collection(db, collectionName), data);
+//     console.log("Document written with ID: ", docRef.id);
+//     return docRef.id; 
+//   } catch (e) {
+//     console.error("Error adding document: ", e);
+//     throw e; 
+//   }
+// };
+
+export const saveData = async (collectionName: string, docId: string, docData: Object) => {
   try {
-    const docRef = await addDoc(collection(db, collectionName), data);
-    console.log("Document written with ID: ", docRef.id);
-    return docRef.id; 
-  } catch (e) {
-    console.error("Error adding document: ", e);
-    throw e; 
+    const docRef = doc(collection(db, collectionName), docId);
+    await setDoc(docRef, docData);
+    console.log("Document successfully written!");
+  } catch (error) {
+    console.error("Error writing document: ", error instanceof FirestoreError ? error.message : error);
   }
 };
 
@@ -41,7 +51,8 @@ export const loadSores = async (viewName: string): Promise<CankerSore[]> => {
 
         return {
             id: doc.id,
-            lastUpdated,
+            active: data.active,
+            lastUpdated: lastUpdated,
             numberOfDays: data.numberOfDays,
             zone: data.zone,
             gums: data.gums,
@@ -64,6 +75,16 @@ export const saveSore = async (cankerSore: CankerSore) => {
     console.error("Error writing document: ", error);
   }
 };
+
+// export const saveDailyLog = async (dailyLog: DailyLog) => {
+//   try {
+//     const dailyLogRef = doc(collection(db, "dailyLogs"), dailyLog.id);
+//     await setDoc(dailyLogRef, dailyLog);
+//     console.log("Document successfully written!");
+//   } catch (error) {
+//     console.error("Error writing document: ", error);
+//   }
+// };
 
 export const deleteSore = async (soreId: string) => {
   try {
