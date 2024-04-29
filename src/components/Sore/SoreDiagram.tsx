@@ -3,8 +3,9 @@ import SoreCircle from "./SoreCircle";
 import { CankerSore } from "../../types";
 import { useCankerSores } from '../../context/CankerSoresContext'; 
 import { handleAddSoreClick, handleFindNearestSoreClick, handleSelectMouthZoneClick } from "../../utilities/ClickHandlers";
-import { off } from "process";
 import Button from "../Button";
+import mouthDiagramImage from '../../assets/images/mouthDiagramNoLabels.png'
+import gumsDiagramImage from '../../assets/images/GumsDiagram.png'
 
 interface SoreDiagramProps {
     addMode: boolean;
@@ -22,10 +23,8 @@ function SoreDiagram({ addMode, editMode, cankerSores, selectedSore }: SoreDiagr
     const [ selectedZone, setSelectedZone ] = useState<string>("mouthDiagramNoLabels")
     const [imageDimensions, setImageDimensions] = useState({ width: 0, height: 0 });
     const [toggleGums, setToggleGums] = useState(false);  
-    const imageName = toggleGums ? "GumsDiagram" : "mouthDiagramNoLabels";
+    const imageURL = toggleGums ? gumsDiagramImage : mouthDiagramImage;
     const buttonLabel = toggleGums ? "Switch to Mouth" : "Switch to Gums"; 
-    const imageURL: string = `../assets/images/${imageName}.png`
-
 
     const handleImageClick = (event: React.MouseEvent<HTMLImageElement, MouseEvent>) => {
         if (addMode && zoomed === 1) {
@@ -92,6 +91,8 @@ function SoreDiagram({ addMode, editMode, cankerSores, selectedSore }: SoreDiagr
             });
         }
     };
+
+
     
     return (
         <div className="existing-sores-diagram">

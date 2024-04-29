@@ -1,56 +1,4 @@
-/* .App {
-  text-align: center;
-}
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: black;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
-}
-
-.App-link {
-  color: #61dafb;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-button {
-  background-color: red;
-  color: white;
-  font-size: 1.25rem;
-  font-weight: 600;
-  border-radius: 25px;
-  padding: 15px;
-  margin: 10px;
-  border: white 2px solid;
-}
-
-button:hover {
-  opacity: 0.7;
-} */
 
 label {
   display: block;
@@ -62,6 +10,8 @@ label {
 input {
   padding: 10px;
   margin: 10px;
+  border: 1px black solid;
+  border-radius: 5px;
 }
 
 /* Containers */
@@ -75,4 +25,19 @@ input {
 
 .daily-log-container h2 {
   text-align: left;
+}
+
+/* .toggle-checkbox:checked {
+    right: 0;
+    border-color: #68d391;
+}
+.toggle-checkbox:checked + .toggle-label {
+    background-color: #68d391;
+} */
+
+/* Headings */
+
+h2 {
+  font-size: 2rem;
+  padding: 20px 0;
 }

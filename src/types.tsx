@@ -18,7 +18,7 @@ export interface DailyLog {
     currentlySick: boolean;
     sugarUse: boolean;
     spicyFood: boolean;
-    caffineUse: number;
+    caffeineUse: number;
     carbonatedDrinks: number;
     alcoholicDrinks: number;
     hoursOfSleep: number;
