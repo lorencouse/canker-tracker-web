@@ -1,6 +1,5 @@
 import React from "react";
 import { CankerSore } from "../../types";
-import { useCankerSores } from "../../context/CankerSoresContext";
 
 interface SoreCircleProps {
     sore: CankerSore;
@@ -8,7 +7,8 @@ interface SoreCircleProps {
     selected: boolean;
     zoomed: number,
     offsetX: number,
-    offsetY: number
+    offsetY: number,
+    setSelectedSore: (sore: CankerSore | null) => void;
 }
 
 const getColor = (step: number) => {
@@ -16,12 +16,10 @@ const getColor = (step: number) => {
     return `rgb(${value}, ${255 - value}, ${255 - value}`;
 };
 
-const SoreCircle: React.FC<SoreCircleProps> = React.memo(({ sore, imageDimensions, selected, zoomed, offsetX, offsetY }) => {
+const SoreCircle: React.FC<SoreCircleProps> = React.memo(({ sore, imageDimensions, selected, zoomed, offsetX, offsetY, setSelectedSore }) => {
     
-    const { setSelectedSore } = useCankerSores()
     const zoomLevel = zoomed * 100;
     const {xCoordinate, yCoordinate, painLevel, soreSize} = sore;
-    
     const size = Math.max(imageDimensions.width, imageDimensions.height) * (soreSize[soreSize.length - 1] / (zoomed ? 100 : 200));
     const xPercent = ((xCoordinate ?? 0) * (zoomLevel))
     const yPercent = ((yCoordinate ?? 0) * (zoomLevel))

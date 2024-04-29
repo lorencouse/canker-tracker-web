@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import "./MouthImage.css";
 import SoreDiagram from "../components/Sore/SoreDiagram";
 import { CankerSore } from "../types";
-import { useCankerSores } from "../context/CankerSoresContext";
+// import { useCankerSores } from "../context/CankerSoresContext";
 import { loadSores, clearAllSores, deleteSore, saveSore, saveData } from "../services/firestoreService";
 import SoreDetails from "../components/Sore/SoreDetails";
 import SoreSliders from "../components/SoreSliders";
@@ -14,7 +14,7 @@ import Button from "../components/Button";
 const MouthOverview: React.FC = () => {
     const [addMode, setAddMode] = useState<boolean>(false);
     const [editMode, setEditMode] = useState<boolean>(false);
-    const { selectedSore, setSelectedSore } = useCankerSores();
+    const [ selectedSore, setSelectedSore ] = useState<CankerSore | null>(null);
     const [cankerSores, setCankerSores] = useState<CankerSore[]>([]); 
     const [filterBy, setFilterBy] = useState<FilterBy>({});
     const [unfilterdSores, setUnfilteredSores] = useState<CankerSore[]>(cankerSores);
@@ -43,8 +43,9 @@ const MouthOverview: React.FC = () => {
     async function addMoreButtonHandler() {
         if (selectedSore) {
             try {
-                await saveSore(selectedSore);
-                fetchSores();
+                await saveData("cankerSores", selectedSore.id, selectedSore)
+                const newCankerSores = [...cankerSores, selectedSore];
+                setCankerSores(newCankerSores);
             } catch (error) {
                 console.error("Failed to save sore and navigate:", error);
             }
@@ -64,9 +65,12 @@ const MouthOverview: React.FC = () => {
     async function finishEditingButtonHandler() {
         if (selectedSore) {
             try {
+                await saveData("cankerSores", selectedSore.id, selectedSore)
                 setEditMode(false);
-                await saveSore(selectedSore);
-                fetchSores();
+                let newCankerSores = cankerSores.filter(sore => sore.id !== selectedSore.id);
+                newCankerSores.push(selectedSore);
+                setCankerSores(newCankerSores);
+                
             } catch (error) {
                 console.error("Failed to update:", error);
             }
@@ -79,9 +83,9 @@ const MouthOverview: React.FC = () => {
         if (selectedSore) {
             try {
                 setAddMode(false);
-                // await saveSore(selectedSore);
                 await saveData("cankerSores", selectedSore.id, selectedSore)
-                fetchSores();
+                const newCankerSores = [...cankerSores, selectedSore];                
+                setCankerSores(newCankerSores);
             } catch (error) {
                 console.error("Failed to finish adding:", error);
             }
@@ -94,8 +98,9 @@ const MouthOverview: React.FC = () => {
         if (selectedSore) {
             try {
                 await deleteSore(selectedSore.id);
+                const newCankerSores = cankerSores.filter(sore => sore.id !== selectedSore.id);
+                setCankerSores(newCankerSores)
                 setSelectedSore(null);
-                fetchSores();
             } catch (error) {
                 console.error("Failed to delete sore: ", error)
             } 
@@ -132,7 +137,7 @@ const MouthOverview: React.FC = () => {
     return (
         <div className="mouth-overview">
             
-            <SoreDiagram addMode={addMode} editMode={editMode} cankerSores={cankerSores} selectedSore={selectedSore}/>
+            <SoreDiagram addMode={addMode} editMode={editMode} cankerSores={cankerSores} selectedSore={selectedSore} setSelectedSore={setSelectedSore}/>
             <h1>{(addMode && !selectedSore) ? "Select a Location" : (addMode && selectedSore) ? `Sore on ${selectedSore.zone}` : editMode ? `Edit Mode${`: ${selectedSore?.zone ?? ""}`}` : "Select or Add a Sore"}</h1>
 
             {/* <Filters /> */}
@@ -177,7 +182,6 @@ const MouthOverview: React.FC = () => {
         <Button label={"Edit"} action={editButtonHandler} />
         <Button label={"Delete"} action={deleteSoreButtonHandler} />
         <Button label={"Delete all"} action={deletedAllButtonHandler} />
-        <Filters filterBy={filterBy} setFilterBy={setFilterBy} cankerSores={unfilterdSores} setCankerSores={setCankerSores} />
     </div>
 )}
 

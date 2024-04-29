@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import SoreCircle from "./SoreCircle";
 import { CankerSore } from "../../types";
-import { useCankerSores } from '../../context/CankerSoresContext'; 
 import { handleAddSoreClick, handleFindNearestSoreClick, handleSelectMouthZoneClick } from "../../utilities/ClickHandlers";
 import Button from "../Button";
 import mouthDiagramImage from '../../assets/images/mouthDiagramNoLabels.png'
@@ -12,14 +11,14 @@ interface SoreDiagramProps {
     editMode: boolean;
     cankerSores: CankerSore[];
     selectedSore: CankerSore | null;
+    setSelectedSore: (sore: CankerSore | null) => void;
 }
 
-function SoreDiagram({ addMode, editMode, cankerSores, selectedSore }: SoreDiagramProps) {
+function SoreDiagram({ addMode, editMode, cankerSores, selectedSore, setSelectedSore }: SoreDiagramProps) {
     const imageRef = useRef<HTMLImageElement>(null);
     const [zoomed, setZoomed] = useState<number>(1);
     const [offsetX, setOffsetX] = useState(0);
     const [offsetY, setOffsetY] = useState(0);   
-    const { setSelectedSore } = useCankerSores();
     const [ selectedZone, setSelectedZone ] = useState<string>("mouthDiagramNoLabels")
     const [imageDimensions, setImageDimensions] = useState({ width: 0, height: 0 });
     const [toggleGums, setToggleGums] = useState(false);  
@@ -105,7 +104,7 @@ function SoreDiagram({ addMode, editMode, cankerSores, selectedSore }: SoreDiagr
                     transformOrigin: `${50 - offsetX}% ${50 - offsetY}%` 
                 }}/>
                 {selectedSore && (
-                <SoreCircle sore={selectedSore} imageDimensions={imageDimensions} selected={true} zoomed={zoomed} offsetX={offsetX} offsetY={offsetY}/>
+                <SoreCircle sore={selectedSore} imageDimensions={imageDimensions} selected={true} zoomed={zoomed} offsetX={offsetX} offsetY={offsetY} setSelectedSore={setSelectedSore}/>
             )}
                 {cankerSores.filter(sore => sore.id !== selectedSore?.id).map((sore) => (
                     <SoreCircle 
@@ -115,6 +114,7 @@ function SoreDiagram({ addMode, editMode, cankerSores, selectedSore }: SoreDiagr
                         zoomed={zoomed}
                         offsetX={offsetX}
                         offsetY={offsetY}
+                        setSelectedSore={setSelectedSore}
                     />
                 ))}
 
