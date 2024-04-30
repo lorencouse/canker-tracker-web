@@ -119,7 +119,7 @@ function SoreDiagram({ addMode, editMode, cankerSores, selectedSore, setSelected
                 ))}
 
             </div>
-            { zoomed !== 0 && <Button label={buttonLabel} action={ handleGumsMode} />}
+            { zoomed > 1 && <Button label={buttonLabel} action={ handleGumsMode} />}
 
         </div>
     )

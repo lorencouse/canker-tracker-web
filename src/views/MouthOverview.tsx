@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import "./MouthImage.css";
 import SoreDiagram from "../components/Sore/SoreDiagram";
 import { CankerSore } from "../types";
-// import { useCankerSores } from "../context/CankerSoresContext";
 import { loadSores, clearAllSores, deleteSore, saveSore, saveData } from "../services/firestoreService";
 import SoreDetails from "../components/Sore/SoreDetails";
 import SoreSliders from "../components/SoreSliders";
@@ -12,13 +11,44 @@ import { useNavigate } from "react-router-dom";
 import Button from "../components/Button";
 
 const MouthOverview: React.FC = () => {
+    const navigate = useNavigate();
+
     const [addMode, setAddMode] = useState<boolean>(false);
     const [editMode, setEditMode] = useState<boolean>(false);
-    const [ selectedSore, setSelectedSore ] = useState<CankerSore | null>(null);
+    const [selectedSore, setSelectedSore ] = useState<CankerSore | null>(null);
     const [cankerSores, setCankerSores] = useState<CankerSore[]>([]); 
-    const [filterBy, setFilterBy] = useState<FilterBy>({});
-    const [unfilterdSores, setUnfilteredSores] = useState<CankerSore[]>(cankerSores);
-    const navigate = useNavigate();
+    const [dailyLogCompleted, setDailyLogCompleted] = useState<boolean>(true);
+
+  
+//   async function checkDailyLogUptoDate() {
+//     let lastLogTime: Date;
+
+//     // Load Last Log Time
+//     try {
+//       const lastLogTimeLoaded: Date = await loadData("lastLogTime");
+//       setLastLogTime(new Date(lastLogTimeLoaded));
+//     } catch (e) {
+//       alert(`Unable to load last log time ${e.message}`);
+//       return;
+//     }
+
+//     // Check if Log upto date
+//     if (!lastLogTime) {
+//       setDailyLogCompleted(false);
+//     } else {
+//       const currentDate = new Date();
+//       const timeDifference = currentDate.getTime() = lastLogTime.getTime();
+//       const twentyThreeHrsToMs = 23 * 60 * 60 *1000;
+
+//       if (timeDifference > twentyThreeHrsToMs) {
+//       setDailyLogCompleted(false);
+
+//       } else {
+//         setDailyLogCompleted(true);
+//       }
+
+//     } 
+//   };
 
     const fetchSores = async () => {
         try {
@@ -30,6 +60,7 @@ const MouthOverview: React.FC = () => {
     };
 
     useEffect(() => {
+        // checkDailyLogUptoDate()
         fetchSores();
     }, []);
 
@@ -79,13 +110,36 @@ const MouthOverview: React.FC = () => {
         }
     }
 
+    async function updateButtonHandler() {
+        if (selectedSore) {
+            try {
+                await saveData("cankerSores", selectedSore.id, selectedSore)
+                setEditMode(false);
+                let newCankerSores = cankerSores.filter(sore => sore.id !== selectedSore.id);
+                newCankerSores.push(selectedSore);
+                setCankerSores(newCankerSores);
+                
+            } catch (error) {
+                console.error("Failed to update:", error);
+            }
+        } else {
+                setEditMode(false)
+        }
+    }
+
     async function finishAddingButtonHandler() {
         if (selectedSore) {
             try {
                 setAddMode(false);
-                await saveData("cankerSores", selectedSore.id, selectedSore)
-                const newCankerSores = [...cankerSores, selectedSore];                
-                setCankerSores(newCankerSores);
+                await saveData("cankerSores", selectedSore.id, selectedSore);
+                if (!dailyLogCompleted) {
+                    navigate('/dailyLog');
+                    
+                } else {
+                    const newCankerSores = [...cankerSores, selectedSore];                
+                    setCankerSores(newCankerSores);
+                }
+
             } catch (error) {
                 console.error("Failed to finish adding:", error);
             }
@@ -185,6 +239,14 @@ const MouthOverview: React.FC = () => {
     </div>
 )}
 
+{!dailyLogCompleted && 
+    (
+        <div id='update-sore-buttons'>
+            <Button label={"Update"} action={updateButtonHandler} />
+        </div>
+    )
+}
+
 {editMode && (
     <div className="edit-sore-buttons">
         <Button label={"Finish"} action={finishEditingButtonHandler} />
@@ -193,7 +255,7 @@ const MouthOverview: React.FC = () => {
 )}
 
 
-            {selectedSore && !addMode && <SoreDetails sore={selectedSore} onDelete={deleteSoreButtonHandler} />}
+        {selectedSore && !addMode && <SoreDetails sore={selectedSore} onDelete={deleteSoreButtonHandler} />}
 
 
         </div>

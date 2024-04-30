@@ -1,17 +1,7 @@
 import { db } from '../firebaseConfig';
-import { collection, addDoc, getDocs, setDoc, deleteDoc, doc, writeBatch, query, where, FirestoreError } from 'firebase/firestore';
+import { collection, getDocs, setDoc, deleteDoc, doc, writeBatch, query, where, FirestoreError } from 'firebase/firestore';
 import { CankerSore, DailyLog } from '../types';
 
-// export const saveData = async (collectionName: string, data: Record<string, any>) => {
-//   try {
-//     const docRef = await addDoc(collection(db, collectionName), data);
-//     console.log("Document written with ID: ", docRef.id);
-//     return docRef.id; 
-//   } catch (e) {
-//     console.error("Error adding document: ", e);
-//     throw e; 
-//   }
-// };
 
 export const saveData = async (collectionName: string, docId: string, docData: Object) => {
   try {
@@ -75,16 +65,6 @@ export const saveSore = async (cankerSore: CankerSore) => {
     console.error("Error writing document: ", error);
   }
 };
-
-// export const saveDailyLog = async (dailyLog: DailyLog) => {
-//   try {
-//     const dailyLogRef = doc(collection(db, "dailyLogs"), dailyLog.id);
-//     await setDoc(dailyLogRef, dailyLog);
-//     console.log("Document successfully written!");
-//   } catch (error) {
-//     console.error("Error writing document: ", error);
-//   }
-// };
 
 export const deleteSore = async (soreId: string) => {
   try {

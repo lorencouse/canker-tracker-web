@@ -8,7 +8,25 @@ import Button from "../components/Button";
 import { InputCheckboxField, InputNumberField } from "../components/InputBox";
 
 
+
+
 const DailyLogView: React.FC = () => {
+
+// const [dailyLogs, setDailyLogs] = useState<DailyLog[]>();
+
+//   async function fetchDailyLogs() {
+//     try {
+//       const dailyLogsLoaded: DailyLog[] = await loadData("dailyLogs");
+//       setDailyLogs(dailyLogsLoaded);
+//     } catch (e) {
+//       alert(`Could not load daily log: ${e}`)
+//     }
+//   }
+
+//   useEffect(() =>
+//   (
+//     await fetchDailyLogs
+//   ),[]);
 
     const today = new Date();
     const [dailyLog, setDailyLog] = useState<DailyLog>(
@@ -38,7 +56,8 @@ const DailyLogView: React.FC = () => {
     let handleFinishButtonClick = async() => {
         if (dailyLog) {
             try {
-                await saveData("dailyLogs", dailyLog.id, dailyLog)
+                await saveData("dailyLogs", dailyLog.id, dailyLog);
+                // await saveData("lastLogTime");
                 navigate("/");
             } catch (e) {
                 alert(`Could not save log. Error: ${e}`)
@@ -50,8 +69,6 @@ const DailyLogView: React.FC = () => {
 return (
     <div className="daily-log-container">
         <div className="input-form max-w-md flex flex-col justify-around">
-
-        
 
         <form>
             <h2>Diet</h2>

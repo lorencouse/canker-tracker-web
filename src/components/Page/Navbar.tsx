@@ -24,7 +24,7 @@ export default function Navbar() {
   const navigation = [
   { name: 'Mouth Overview', href: '/', current: currentLocation === '/' },
   { name: 'Daily Log', href: '/dailyLog', current: currentLocation === '/dailyLog' },
-  { name: 'Guides', href: '/guides', current: currentLocation === '/guides' },
+  { name: 'New Sores', href: '/newSores', current: currentLocation === '/newSores' },
   { name: 'Profile', href: '/profile', current: currentLocation === '/profile' },
 ]
 
