@@ -2,7 +2,7 @@ import React, { ChangeEvent, useState } from "react";
 import { useNavigate } from 'react-router-dom'; 
 import { v4 as uuidv4 } from 'uuid';
 import { db } from '../firebaseConfig';
-import { saveData } from "../services/firestoreService";
+import { saveLogTime, saveData } from "../services/firestoreService";
 import { DailyLog } from "../types";
 import Button from "../components/Button";
 import { InputCheckboxField, InputNumberField } from "../components/InputBox";
@@ -57,7 +57,7 @@ const DailyLogView: React.FC = () => {
         if (dailyLog) {
             try {
                 await saveData("dailyLogs", dailyLog.id, dailyLog);
-                // await saveData("lastLogTime");
+                await saveLogTime(today);
                 navigate("/");
             } catch (e) {
                 alert(`Could not save log. Error: ${e}`)

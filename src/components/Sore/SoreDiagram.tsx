@@ -92,6 +92,8 @@ function SoreDiagram({ addMode, editMode, cankerSores, selectedSore, setSelected
     };
 
 
+
+
     
     return (
         <div className="existing-sores-diagram">

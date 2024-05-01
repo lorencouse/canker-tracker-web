@@ -1,5 +1,5 @@
 import { db } from '../firebaseConfig';
-import { collection, getDocs, setDoc, deleteDoc, doc, writeBatch, query, where, FirestoreError } from 'firebase/firestore';
+import { collection, getDocs, getDoc, setDoc, deleteDoc, doc, writeBatch, query, where, FirestoreError } from 'firebase/firestore';
 import { CankerSore, DailyLog } from '../types';
 
 
@@ -56,15 +56,15 @@ export const loadSores = async (viewName: string): Promise<CankerSore[]> => {
     return cankerSores;
 };
 
-export const saveSore = async (cankerSore: CankerSore) => {
-  try {
-    const cankerSoreRef = doc(collection(db, "cankerSores"), cankerSore.id);
-    await setDoc(cankerSoreRef, cankerSore);
-    console.log("Document successfully written!");
-  } catch (error) {
-    console.error("Error writing document: ", error);
-  }
-};
+// export const saveSore = async (cankerSore: CankerSore) => {
+//   try {
+//     const cankerSoreRef = doc(collection(db, "cankerSores"), cankerSore.id);
+//     await setDoc(cankerSoreRef, cankerSore);
+//     console.log("Document successfully written!");
+//   } catch (error) {
+//     console.error("Error writing document: ", error);
+//   }
+// };
 
 export const deleteSore = async (soreId: string) => {
   try {
@@ -87,4 +87,33 @@ export const clearAllSores = async () => {
 
   await batch.commit(); 
   console.log('All canker sore data cleared.');
+};
+
+// Last Log Time
+
+const LOG_REF = doc(db, "settings", "logTime"); // Define a single reference path
+
+export const saveLogTime = async (date: Date) => {
+  try {
+    await setDoc(LOG_REF, { time: date });
+    console.log("Log time successfully saved!");
+  } catch (error) {
+    console.error("Error saving log time: ", error instanceof FirestoreError ? error.message : error);
+  }
+};
+
+export const loadLogTime = async () => {
+  try {
+    const docSnap = await getDoc(LOG_REF);
+    if (docSnap.exists()) {
+      console.log("Document data:", docSnap.data());
+      return new Date(docSnap.data().time); // Assuming the stored data has a 'time' property
+    } else {
+      console.log("No such document!");
+      return null; // Return null if the document doesn't exist
+    }
+  } catch (e) {
+    console.error("Error loading log time: ", e);
+    throw e;
+  }
 };

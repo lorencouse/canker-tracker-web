@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import "./MouthImage.css";
 import SoreDiagram from "../components/Sore/SoreDiagram";
 import { CankerSore } from "../types";
-import { loadSores, clearAllSores, deleteSore, saveSore, saveData } from "../services/firestoreService";
+import { loadSores, clearAllSores, deleteSore, saveData, loadLogTime } from "../services/firestoreService";
 import SoreDetails from "../components/Sore/SoreDetails";
 import SoreSliders from "../components/SoreSliders";
 import { Filters, FilterBy } from "../components/Filters";
@@ -17,52 +17,67 @@ const MouthOverview: React.FC = () => {
     const [editMode, setEditMode] = useState<boolean>(false);
     const [selectedSore, setSelectedSore ] = useState<CankerSore | null>(null);
     const [cankerSores, setCankerSores] = useState<CankerSore[]>([]); 
-    const [dailyLogCompleted, setDailyLogCompleted] = useState<boolean>(true);
+    const [dailyLogCompleted, setDailyLogCompleted] = useState<boolean>(false);
+    const [soresToUpdate, setSoresToUpdate] = useState<number>(0);
 
   
-//   async function checkDailyLogUptoDate() {
-//     let lastLogTime: Date;
+async function checkDailyLogUptoDate() {
+  let lastLogTime: Date | null = null;
 
-//     // Load Last Log Time
-//     try {
-//       const lastLogTimeLoaded: Date = await loadData("lastLogTime");
-//       setLastLogTime(new Date(lastLogTimeLoaded));
-//     } catch (e) {
-//       alert(`Unable to load last log time ${e.message}`);
-//       return;
-//     }
+  // Load Last Log Time
+  try {
+    const lastLogTimeLoaded: Date | null = await loadLogTime(); // Assume loadLogTime might return null
+    if (lastLogTimeLoaded === null) {
+      alert("No log time found.");
+      setDailyLogCompleted(false);
+      return;
+    }
+    lastLogTime = new Date(lastLogTimeLoaded);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      alert(`Unable to load last log time: ${error.message}`);
+    } else {
+      alert("An unknown error occurred while loading log time.");
+    }
+    return;
+  }
 
-//     // Check if Log upto date
-//     if (!lastLogTime) {
-//       setDailyLogCompleted(false);
-//     } else {
-//       const currentDate = new Date();
-//       const timeDifference = currentDate.getTime() = lastLogTime.getTime();
-//       const twentyThreeHrsToMs = 23 * 60 * 60 *1000;
+  // Check if Log up to date
+  const currentDate = new Date();
+  const timeDifference = currentDate.getTime() - lastLogTime.getTime(); // Use subtraction to calculate the difference
+  const twentyThreeHrsToMs = 23 * 60 * 60 * 1000;
 
-//       if (timeDifference > twentyThreeHrsToMs) {
-//       setDailyLogCompleted(false);
+  if (timeDifference > twentyThreeHrsToMs) {
+    setDailyLogCompleted(false);
+  } else {
+    setDailyLogCompleted(true);
+  }
+}
 
-//       } else {
-//         setDailyLogCompleted(true);
-//       }
-
-//     } 
-//   };
 
     const fetchSores = async () => {
         try {
                 const loadedSores = await loadSores("mouthDiagramNoLabels");
                 setCankerSores(loadedSores);
+                
+                if (!dailyLogCompleted && loadSores.length > 0) {
+                    setSoresToUpdate(cankerSores.length - 1);
+                    setSelectedSore(cankerSores[soresToUpdate]);
+                    setEditMode(true);
+                }
+
         } catch (error) {
                 console.log("Could not refresh sores" + error)
             }
     };
 
     useEffect(() => {
-        // checkDailyLogUptoDate()
+        checkDailyLogUptoDate()
         fetchSores();
+
     }, []);
+
+
 
     // Button Handlers
 
@@ -93,14 +108,18 @@ const MouthOverview: React.FC = () => {
         }
     };
 
-    async function finishEditingButtonHandler() {
+    async function updateSore(updatedSore: CankerSore) {
+                await saveData("cankerSores", updatedSore.id, updatedSore)
+                let newCankerSores = cankerSores.filter(sore => sore.id !== updatedSore.id);
+                newCankerSores.push(updatedSore);
+                setCankerSores(newCankerSores);
+    }
+
+    function finishEditingButtonHandler() {
         if (selectedSore) {
             try {
-                await saveData("cankerSores", selectedSore.id, selectedSore)
+                updateSore(selectedSore);
                 setEditMode(false);
-                let newCankerSores = cankerSores.filter(sore => sore.id !== selectedSore.id);
-                newCankerSores.push(selectedSore);
-                setCankerSores(newCankerSores);
                 
             } catch (error) {
                 console.error("Failed to update:", error);
@@ -111,21 +130,47 @@ const MouthOverview: React.FC = () => {
     }
 
     async function updateButtonHandler() {
-        if (selectedSore) {
+        if (selectedSore  && soresToUpdate > 0) {
             try {
-                await saveData("cankerSores", selectedSore.id, selectedSore)
-                setEditMode(false);
-                let newCankerSores = cankerSores.filter(sore => sore.id !== selectedSore.id);
-                newCankerSores.push(selectedSore);
-                setCankerSores(newCankerSores);
-                
+                if (selectedSore.soreSize.length > 0 && selectedSore.soreSize[selectedSore.soreSize.length - 1] === 0) {
+                    await saveData("healedCankerSores", selectedSore.id, selectedSore)
+                    deleteSoreButtonHandler();
+                } else {
+                    updateSoreLog();
+                }
+
             } catch (error) {
                 console.error("Failed to update:", error);
+                return;
             }
-        } else {
+            setSoresToUpdate(soresToUpdate => soresToUpdate - 1);
+            setSelectedSore(cankerSores[soresToUpdate]);
+
+        } 
+        
+        else {
                 setEditMode(false)
+                navigate('/newSores')
         }
     }
+
+    function updateSoreLog() {
+        if ( selectedSore ) {
+            const oldSore = cankerSores.find( sore => sore.id === selectedSore.id);
+            if (oldSore) {
+                const newSore: CankerSore = {...oldSore, 
+                soreSize: oldSore.soreSize.concat(selectedSore?.soreSize), 
+                painLevel: oldSore.painLevel.concat(selectedSore?.painLevel), 
+                lastUpdated: oldSore.lastUpdated.concat(new Date()) 
+            };
+            updateSore(newSore);
+            }
+
+        }
+
+    }
+
+
 
     async function finishAddingButtonHandler() {
         if (selectedSore) {
@@ -239,7 +284,7 @@ const MouthOverview: React.FC = () => {
     </div>
 )}
 
-{!dailyLogCompleted && 
+{!dailyLogCompleted && editMode && 
     (
         <div id='update-sore-buttons'>
             <Button label={"Update"} action={updateButtonHandler} />

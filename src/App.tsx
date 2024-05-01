@@ -6,7 +6,7 @@ import DailyLogView from './Pages/dailyLog';
 import Navbar from './components/Page/Navbar';
 import Footer from './components/Page/Footer';
 import MouthOverview from './views/MouthOverview';
-import NewSoresQuestionaire from './views/NewSoresQuestionaire';
+import NewSoresQuestionaire from './Pages/NewSoresQuestionaire';
 
 
 function App() {
