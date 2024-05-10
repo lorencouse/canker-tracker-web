@@ -2,82 +2,37 @@ import React, { useState, useEffect } from "react";
 import "./MouthImage.css";
 import SoreDiagram from "../components/Sore/SoreDiagram";
 import { CankerSore } from "../types";
-import { loadSores, clearAllSores, deleteSore, saveData, loadLogTime } from "../services/firestoreService";
+import { loadSores, clearAllSores, deleteSore, saveData } from "../services/firestoreService";
 import SoreDetails from "../components/Sore/SoreDetails";
 import SoreSliders from "../components/SoreSliders";
 import { Filters, FilterBy } from "../components/Filters";
 import { ZoneSelector } from "../components/ZoneSelector";
 import { useNavigate } from "react-router-dom";
 import Button from "../components/Button";
+import useDailyLogChecker from "../Hooks/checkDailyLog";
+import { useSoreManager } from "../Hooks/useSoreManager";
 
 const MouthOverview: React.FC = () => {
     const navigate = useNavigate();
+    const { cankerSores, selectedSore, setSelectedSore, fetchSores, addSore, updateSore, updateSoreNewDay, removeSore, removeAllSores } = useSoreManager();
 
     const [addMode, setAddMode] = useState<boolean>(false);
     const [editMode, setEditMode] = useState<boolean>(false);
-    const [selectedSore, setSelectedSore ] = useState<CankerSore | null>(null);
-    const [cankerSores, setCankerSores] = useState<CankerSore[]>([]); 
-    const [dailyLogCompleted, setDailyLogCompleted] = useState<boolean>(false);
+    const [dailyLogCompleted, checkDailyLogUptoDate] = useDailyLogChecker(false);
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [soresToUpdate, setSoresToUpdate] = useState<number>(0);
 
-  
-async function checkDailyLogUptoDate() {
-  let lastLogTime: Date | null = null;
+    useEffect(() => {
+        fetchSores();
+        checkDailyLogUptoDate()
 
-  // Load Last Log Time
-  try {
-    const lastLogTimeLoaded: Date | null = await loadLogTime(); // Assume loadLogTime might return null
-    if (lastLogTimeLoaded === null) {
-      alert("No log time found.");
-      setDailyLogCompleted(false);
-      return;
-    }
-    lastLogTime = new Date(lastLogTimeLoaded);
-  } catch (error: unknown) {
-    if (error instanceof Error) {
-      alert(`Unable to load last log time: ${error.message}`);
-    } else {
-      alert("An unknown error occurred while loading log time.");
-    }
-    return;
-  }
-
-  // Check if Log up to date
-  const currentDate = new Date();
-  const timeDifference = currentDate.getTime() - lastLogTime.getTime(); // Use subtraction to calculate the difference
-  const twentyThreeHrsToMs = 23 * 60 * 60 * 1000;
-
-  if (timeDifference > twentyThreeHrsToMs) {
-    setDailyLogCompleted(false);
-  } else {
-    setDailyLogCompleted(true);
-  }
-}
-
-
-    const fetchSores = async () => {
-        try {
-                const loadedSores = await loadSores("mouthDiagramNoLabels");
-                setCankerSores(loadedSores);
-                
-                if (!dailyLogCompleted && loadSores.length > 0) {
+        if (!dailyLogCompleted && loadSores.length > 0) {
                     setSoresToUpdate(cankerSores.length - 1);
                     setSelectedSore(cankerSores[soresToUpdate]);
                     setEditMode(true);
-                }
-
-        } catch (error) {
-                console.log("Could not refresh sores" + error)
-            }
-    };
-
-    useEffect(() => {
-        checkDailyLogUptoDate()
-        fetchSores();
+        }
 
     }, []);
-
-
 
     // Button Handlers
 
@@ -89,9 +44,8 @@ async function checkDailyLogUptoDate() {
     async function addMoreButtonHandler() {
         if (selectedSore) {
             try {
-                await saveData("cankerSores", selectedSore.id, selectedSore)
-                const newCankerSores = [...cankerSores, selectedSore];
-                setCankerSores(newCankerSores);
+                addSore(selectedSore);
+                
             } catch (error) {
                 console.error("Failed to save sore and navigate:", error);
             }
@@ -108,12 +62,6 @@ async function checkDailyLogUptoDate() {
         }
     };
 
-    async function updateSore(updatedSore: CankerSore) {
-                await saveData("cankerSores", updatedSore.id, updatedSore)
-                let newCankerSores = cankerSores.filter(sore => sore.id !== updatedSore.id);
-                newCankerSores.push(updatedSore);
-                setCankerSores(newCankerSores);
-    }
 
     function finishEditingButtonHandler() {
         if (selectedSore) {
@@ -130,13 +78,14 @@ async function checkDailyLogUptoDate() {
     }
 
     async function updateButtonHandler() {
+
         if (selectedSore  && soresToUpdate > 0) {
             try {
                 if (selectedSore.soreSize.length > 0 && selectedSore.soreSize[selectedSore.soreSize.length - 1] === 0) {
                     await saveData("healedCankerSores", selectedSore.id, selectedSore)
-                    deleteSoreButtonHandler();
+                    removeSore();
                 } else {
-                    updateSoreLog();
+                    updateSoreNewDay();
                 }
 
             } catch (error) {
@@ -149,28 +98,26 @@ async function checkDailyLogUptoDate() {
         } 
         
         else {
-                setEditMode(false)
-                navigate('/newSores')
+                setEditMode(false);
+                setIsDialogOpen(true);
         }
     }
 
-    function updateSoreLog() {
-        if ( selectedSore ) {
-            const oldSore = cankerSores.find( sore => sore.id === selectedSore.id);
-            if (oldSore) {
-                const newSore: CankerSore = {...oldSore, 
-                soreSize: oldSore.soreSize.concat(selectedSore?.soreSize), 
-                painLevel: oldSore.painLevel.concat(selectedSore?.painLevel), 
-                lastUpdated: oldSore.lastUpdated.concat(new Date()) 
-            };
-            updateSore(newSore);
-            }
+    // function updateSoreLog() {
+    //     if ( selectedSore ) {
+    //         const oldSore = cankerSores.find( sore => sore.id === selectedSore.id);
+    //         if (oldSore) {
+    //             const newSore: CankerSore = {...oldSore, 
+    //             soreSize: oldSore.soreSize.concat(selectedSore?.soreSize), 
+    //             painLevel: oldSore.painLevel.concat(selectedSore?.painLevel), 
+    //             lastUpdated: oldSore.lastUpdated.concat(new Date()) 
+    //         };
+    //         updateSore(newSore);
+    //         }
 
-        }
+    //     }
 
-    }
-
-
+    // }
 
     async function finishAddingButtonHandler() {
         if (selectedSore) {
@@ -178,11 +125,12 @@ async function checkDailyLogUptoDate() {
                 setAddMode(false);
                 await saveData("cankerSores", selectedSore.id, selectedSore);
                 if (!dailyLogCompleted) {
-                    navigate('/dailyLog');
+                    navigate('/daily-log');
                     
                 } else {
-                    const newCankerSores = [...cankerSores, selectedSore];                
-                    setCankerSores(newCankerSores);
+                    // const newCankerSores = [...cankerSores, selectedSore];                
+                    // setCankerSores(newCankerSores);
+                    fetchSores();
                 }
 
             } catch (error) {
@@ -193,36 +141,9 @@ async function checkDailyLogUptoDate() {
         }
     }
 
-    async function deleteSoreButtonHandler() {
-        if (selectedSore) {
-            try {
-                await deleteSore(selectedSore.id);
-                const newCankerSores = cankerSores.filter(sore => sore.id !== selectedSore.id);
-                setCankerSores(newCankerSores)
-                setSelectedSore(null);
-            } catch (error) {
-                console.error("Failed to delete sore: ", error)
-            } 
-        } else {
-                alert("Please select a sore to delete.")
-            }
-        
-    }
-
     async function deletedAllButtonHandler() {
-        const allCankerSores = cankerSores;
-        const selectedSoreBackup = selectedSore;
         if (window.confirm("Are you sure you want to delete all cankersores?")) {
-            try {
-                setCankerSores([])
-                setSelectedSore(null)
-                await clearAllSores();
-            } catch {
-                setCankerSores(allCankerSores)
-                setSelectedSore(selectedSoreBackup)
-                console.error("Failed to clear", Error);
-                alert("Clear failed.  Check console for details.")
-            }
+            removeAllSores();
         }
     }
 
@@ -235,6 +156,14 @@ async function checkDailyLogUptoDate() {
 
     return (
         <div className="mouth-overview">
+
+            {isDialogOpen && (
+                <div className="dialog">
+                    <p>Do you have any new sores?</p>
+                    <button onClick={() => setAddMode(true)}>Yes</button>
+                    <button onClick={ () => navigate('/daily-log') }>No</button>
+                </div>
+            )}
             
             <SoreDiagram addMode={addMode} editMode={editMode} cankerSores={cankerSores} selectedSore={selectedSore} setSelectedSore={setSelectedSore}/>
             <h1>{(addMode && !selectedSore) ? "Select a Location" : (addMode && selectedSore) ? `Sore on ${selectedSore.zone}` : editMode ? `Edit Mode${`: ${selectedSore?.zone ?? ""}`}` : "Select or Add a Sore"}</h1>
@@ -271,7 +200,7 @@ async function checkDailyLogUptoDate() {
     <div className="overview-buttons">
         <Button label={"Add"} action={addButtonHandler} />
         <Button label={"Delete all"} action={deletedAllButtonHandler} />
-        <Button label={"Daily Log"} action={() => navigate("daily-log")} />
+        <Button label={"Daily Log"} action={() => navigate("/daily-log")} />
     </div>
 )}
 
@@ -279,7 +208,7 @@ async function checkDailyLogUptoDate() {
     <div className="overview-buttons">
         <Button label={"Add"} action={addButtonHandler} />
         <Button label={"Edit"} action={editButtonHandler} />
-        <Button label={"Delete"} action={deleteSoreButtonHandler} />
+        <Button label={"Delete"} action={removeSore} />
         <Button label={"Delete all"} action={deletedAllButtonHandler} />
     </div>
 )}
@@ -295,12 +224,13 @@ async function checkDailyLogUptoDate() {
 {editMode && (
     <div className="edit-sore-buttons">
         <Button label={"Finish"} action={finishEditingButtonHandler} />
-        <Button label={"Delete"} action={deleteSoreButtonHandler} />
+        <Button label={"Delete"} action={() => removeSore} />
     </div>
 )}
 
+{/* Sore Details */}
 
-        {selectedSore && !addMode && <SoreDetails sore={selectedSore} onDelete={deleteSoreButtonHandler} />}
+        {selectedSore && !addMode && <SoreDetails sore={selectedSore} onDelete={() => removeSore} />}
 
 
         </div>

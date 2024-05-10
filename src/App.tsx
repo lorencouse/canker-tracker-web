@@ -5,8 +5,8 @@ import { CankerSoresProvider } from './context/CankerSoresContext';
 import DailyLogView from './Pages/dailyLog';
 import Navbar from './components/Page/Navbar';
 import Footer from './components/Page/Footer';
-import MouthOverview from './views/MouthOverview';
-import NewSoresQuestionaire from './Pages/NewSoresQuestionaire';
+import MouthOverview from './Pages/mouthOverview';
+import NewSoresQuestionaire from './Pages/newSoresQuestionaire';
 
 
 function App() {
@@ -25,8 +25,8 @@ function App() {
     <Navbar />
       <Routes>
         <Route path="/" element={<MouthOverview />} />
-        <Route path="/dailyLog" element={<DailyLogView />} />
-        <Route path="/newSores" element={<NewSoresQuestionaire />} />
+        <Route path="/daily-log" element={<DailyLogView />} />
+        <Route path="/new-sores" element={<NewSoresQuestionaire />} />
       </Routes>
     <Footer />
     </div>
