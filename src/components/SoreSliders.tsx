@@ -1,13 +1,6 @@
-import React from "react";
-// import Slider from "./Slider";
-
-interface SoreSliderProps {
-    soreSize: number;
-    setSoreSize: (value: number) => void;
-    painLevel: number;
-    setPainLevel: (value: number) => void;
-}
-
+import React, { useState } from "react";
+import { useSoreManager } from "../Hooks/useSoreManager";
+import { CankerSore } from "../types";
 interface SliderProps {
     label: string;
     min: number;
@@ -17,6 +10,7 @@ interface SliderProps {
 }
 
 function Slider({label, min, max, value, onChange}: SliderProps) {
+
 
 return (
 
@@ -32,21 +26,42 @@ return (
 
 }
 
-const SoreSliders = ({soreSize, setSoreSize, painLevel, setPainLevel}: SoreSliderProps) => {
-        const handleSizeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setSoreSize(parseInt(event.target.value, 10));
+interface SoreSlidersProps {
+    selectedSore: CankerSore;
+    setSelectedSore: (sore: CankerSore) => void;
+}
+
+const SoreSliders = ( {selectedSore, setSelectedSore}: SoreSlidersProps) => {
+
+    // const { selectedSore, setSelectedSore } = useSoreManager();
+    
+
+    const handleSizeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const newSize = parseInt(event.target.value, 10);
+        if (selectedSore && selectedSore.soreSize) {
+            const newSizes = [...selectedSore.soreSize];
+            newSizes[newSizes.length - 1] = newSize; // Update the last item or a specific item
+            const newSore = { ...selectedSore, soreSize: newSizes };
+            setSelectedSore(newSore);
+        }
     }
 
     const handlePainLevelChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setPainLevel(parseInt(event.target.value, 10));
+        const newPainLevel = parseInt(event.target.value, 10);
+        if (selectedSore && selectedSore.painLevel) {
+            const newPainLevels = [...selectedSore.painLevel];
+            newPainLevels[newPainLevels.length - 1] = newPainLevel; // Update the last item or a specific item
+            const newSore = { ...selectedSore, painLevel: newPainLevels };
+            setSelectedSore(newSore);
+        }
     }
 
     return (
                 <div className="sliders">
 
-            <Slider label="Size (mm)" min={1} max={20} value={soreSize} onChange={handleSizeChange} />
+            <Slider label="Size (mm)" min={1} max={20} value={selectedSore?.soreSize ? selectedSore.soreSize[selectedSore.soreSize.length - 1] : 3} onChange={handleSizeChange} />
 
-            <Slider label="Pain" min={1} max={10} value={painLevel} onChange={handlePainLevelChange} />
+            <Slider label="Pain" min={1} max={10} value={selectedSore?.painLevel ? selectedSore.painLevel[selectedSore.painLevel.length - 1] : 5} onChange={handlePainLevelChange} />
 
         </div>
     );

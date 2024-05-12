@@ -82,6 +82,6 @@ export function useSoreManager() {
     }
 
 
-    return {cankerSores, selectedSore, fetchSores, addSore, updateSore, updateSoreNewDay, removeSore, removeAllSores, setSelectedSore}
+    return {cankerSores, selectedSore, setCankerSores, fetchSores, addSore, updateSore, updateSoreNewDay, removeSore, removeAllSores, setSelectedSore}
 
 }

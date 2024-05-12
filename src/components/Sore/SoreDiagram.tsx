@@ -6,6 +6,8 @@ import Button from "../Button";
 import mouthDiagramImage from '../../assets/images/mouthDiagramNoLabels.png'
 import gumsDiagramImage from '../../assets/images/GumsDiagram.png'
 
+
+
 interface SoreDiagramProps {
     addMode: boolean;
     editMode: boolean;
@@ -15,11 +17,13 @@ interface SoreDiagramProps {
 }
 
 function SoreDiagram({ addMode, editMode, cankerSores, selectedSore, setSelectedSore }: SoreDiagramProps) {
+
     const imageRef = useRef<HTMLImageElement>(null);
     const [zoomed, setZoomed] = useState<number>(1);
     const [offsetX, setOffsetX] = useState(0);
     const [offsetY, setOffsetY] = useState(0);   
     const [ selectedZone, setSelectedZone ] = useState<string>("mouthDiagramNoLabels")
+
     const [imageDimensions, setImageDimensions] = useState({ width: 0, height: 0 });
     const [toggleGums, setToggleGums] = useState(false);  
     const imageURL = toggleGums ? gumsDiagramImage : mouthDiagramImage;
@@ -28,7 +32,6 @@ function SoreDiagram({ addMode, editMode, cankerSores, selectedSore, setSelected
     const handleImageClick = (event: React.MouseEvent<HTMLImageElement, MouseEvent>) => {
         if (addMode && zoomed === 1) {
             handleSelectMouthZoneClick(event, setSelectedZone, setZoomed, zoomToSore);
-            setZoomed(2);
         } else if (editMode && zoomed !== 1) {
         handleFindNearestSoreClick(event, cankerSores, setSelectedSore, imageRef);
         console.log(cankerSores)
@@ -71,7 +74,7 @@ function SoreDiagram({ addMode, editMode, cankerSores, selectedSore, setSelected
         } if (selectedSore?.gums) {
             setToggleGums(true);
         }
-    }, [editMode, addMode, selectedSore]);
+    }, [editMode, addMode, selectedSore, zoomToSore]);
     
     useEffect(() => {
         updateImageSize(); 
@@ -90,10 +93,6 @@ function SoreDiagram({ addMode, editMode, cankerSores, selectedSore, setSelected
             });
         }
     };
-
-
-
-
     
     return (
         <div className="existing-sores-diagram">
