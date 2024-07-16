@@ -1,14 +1,12 @@
 export interface CankerSore {
   id: string;
-//   active: boolean;
-  lastUpdated: Date[];
-//   numberOfDays: number;
+  updated: Date[];
   zone: string;
   gums: boolean;
-  soreSize: number[];
-  painLevel: number[];
-  xCoordinate?: number;
-  yCoordinate?: number;
+  size: number[];
+  pain: number[];
+  x?: number;
+  y?: number;
 }
 
 export interface DailyLog {

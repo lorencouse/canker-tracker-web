@@ -1,59 +1,44 @@
-import React from 'react';
+import type React from 'react';
+import { Circle, Label, Text } from 'react-konva';
 
-import type { CankerSore } from '../../types';
+import type { CankerSore } from '@/types';
 
 interface SoreCircleProps {
   sore: CankerSore;
-  selected: boolean;
-  imageDimensions: { width: number; height: number };
-  zoomed: number;
-  offsetX: number;
-  offsetY: number;
-  setSelectedSore: (sore: CankerSore | null) => void;
+  handleDragLabelCoordination: (e: any) => void;
+  handleClickLabel: (e: any) => void;
 }
 
-const getColor = (step: number) => {
-  const value = step * 28;
-  return `rgb(${value}, ${255 - value}, ${255 - value}`;
-};
+const SoreCircle: React.FC<SoreCircleProps> = ({
+  sore,
+  handleDragLabelCoordination,
+  handleClickLabel,
+}) => {
+  const getColor = (painLevel: number) => {
+    const shade = 255 - painLevel * 20;
+    return `rgb(255, ${shade}, ${shade})`;
+  };
 
-const SoreCircle: React.FC<SoreCircleProps> = React.memo(
-  ({
-    sore,
-    imageDimensions,
-    selected,
-    zoomed,
-    offsetX,
-    offsetY,
-    setSelectedSore,
-  }) => {
-    const zoomLevel = zoomed * 100;
-    const { xCoordinate, yCoordinate, painLevel, soreSize } = sore;
-    const size =
-      Math.max(imageDimensions.width, imageDimensions.height) *
-      (soreSize[soreSize.length - 1] / (200 / zoomed));
-    const xPercent = (xCoordinate ?? 0) * zoomLevel;
-    const yPercent = (yCoordinate ?? 0) * zoomLevel;
+  const latestSize = sore.size[sore.size.length - 1];
+  const latestPain = sore.pain[sore.pain.length - 1];
 
-    return (
-      <div
-        className="canker-sore"
-        onClick={() => {
-          setSelectedSore(sore);
-        }}
-        style={{
-          left: `${zoomed !== 1 ? xPercent + (offsetX - 100 / zoomed) : xPercent}%`,
-          top: `${zoomed !== 1 ? yPercent + (offsetY - 100 / zoomed) : yPercent}%`,
-          width: `${size}px`,
-          height: `${size}px`,
-          backgroundColor: `${getColor(painLevel[painLevel.length - 1])}, ${selected ? '1' : '0.5)'}`,
-          border: selected ? '2px solid blue' : '1px solid white',
-          // opacity: selected ? "100%" : "20%"
-        }}
-        key={sore.id}
+  return (
+    <Label
+      id={`${sore.id}`}
+      x={sore.x}
+      y={sore.y}
+      draggable
+      onDragEnd={handleDragLabelCoordination}
+      onClick={handleClickLabel}
+    >
+      <Circle
+        width={latestSize * 3}
+        height={latestSize * 3}
+        fill={getColor(latestPain)}
+        shadowBlur={5}
       />
-    );
-  }
-);
+    </Label>
+  );
+};
 
 export default SoreCircle;

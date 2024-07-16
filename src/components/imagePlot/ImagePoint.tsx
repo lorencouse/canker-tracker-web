@@ -1,84 +1,29 @@
 import type React from 'react';
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Stage, Layer, Group, Label, Circle, Text } from 'react-konva';
-import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
+import { Stage, Layer, Group } from 'react-konva';
+import { v4 as uuidv4 } from 'uuid';
+
+import SoreCircle from '../SoreComponents/SoreCircle';
+import { useUIContext } from '@/Context/UiContext';
+import type { CankerSore } from '@/types';
 
 import Images from './Images';
 
-interface Coord {
-  x: number;
-  y: number;
-}
-
-interface CirclePointListProps {
-  label: number;
-  toggleCheckboxHandler: (label: number) => () => void;
-  deleteCircleList: number[];
-}
-
-const CirclePointList: React.FC<CirclePointListProps> = ({
-  label,
-  toggleCheckboxHandler,
-  deleteCircleList,
-}) => (
-  <li style={{ listStyleType: 'none' }}>
-    <input
-      type="checkbox"
-      style={{ marginRight: '15px' }}
-      onChange={toggleCheckboxHandler(label)}
-      checked={deleteCircleList.indexOf(label) > -1}
-    />
-    Circle Point {label}
-  </li>
-);
-
 const ImagePoint: React.FC = () => {
+  const { sores, setSores, selectedSore, setSelectedSore } = useUIContext();
   const [image] = useState<string>('/assets/images/mouth.png');
-  const [circleList, setCircleList] = useState<React.ReactNode[]>([]);
   const stageRef = useRef<any>(null);
   const [stageWidth, setStageWidth] = useState<number>(0);
   const [stageHeight, setStageHeight] = useState<number>(0);
-  const [showModal, setShowModal] = useState<boolean>(false);
-  const [deleteCircleList, setDeleteCircleList] = useState<number[]>([]);
-  const [imageClickCoordList, setImageClickCoordList] = useState<Coord[]>([]);
+  // const [deleteCircleList, setDeleteCircleList] = useState<number[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
-  // const maxZoom = 2.5;
-  // const minZoom = 0.75;
 
   useEffect(() => {
-    const jsonImageClickCoordList = JSON.parse(
-      localStorage.getItem('imageClickCoordList') || '[]'
-    );
-    if (jsonImageClickCoordList.length) {
-      circleListAfterDeleteReload(jsonImageClickCoordList);
+    const jsonSores = JSON.parse(localStorage.getItem('sores') || '[]');
+    if (jsonSores.length) {
+      setSores(jsonSores);
     }
   }, []);
-
-  const circleListAfterDeleteReload = useCallback(
-    (imageClickCoordList: Coord[]) => {
-      const circleListTemp = imageClickCoordList.map((cur, index) => (
-        <Label
-          key={index + 1}
-          id={`${index + 1}`}
-          x={cur.x}
-          y={cur.y}
-          draggable
-          onClick={handleClickLabel}
-          onDragEnd={handleDragLabelCoordination}
-        >
-          <Circle width={25} height={25} fill="red" shadowBlur={5} />
-          <Text text={(index + 1).toString()} offsetX={3} offsetY={3} />
-        </Label>
-      ));
-      setCircleList([...circleListTemp]);
-      setImageClickCoordList([...imageClickCoordList]);
-      localStorage.setItem(
-        'imageClickCoordList',
-        JSON.stringify([...imageClickCoordList])
-      );
-    },
-    []
-  );
 
   const calculateCoordination = (e: any) => {
     const stage = e.target.getStage();
@@ -94,75 +39,61 @@ const ImagePoint: React.FC = () => {
   const handleDragLabelCoordination = (e: any) => {
     const { x, y } = calculateCoordination(e);
 
-    let id = 0;
+    let id = '';
     const nodes = e.target.findAncestors('Label', true);
     if (nodes.length > 0) {
       for (let i = 0; i < nodes.length; i++) {
         id = nodes[i].getAttr('id');
       }
     } else {
-      id = parseInt(e.target.id());
+      id = e.target.id();
+    }
+    const updatedSores = sores.map((sore) =>
+      sore.id === id ? { ...sore, x, y } : sore
+    );
+
+    setSores(updatedSores);
+    setSelectedSore(updatedSores.find((sore) => sore.id === id));
+  };
+
+  const handleClickLabel = (e: any) => {
+    let id = '';
+    const nodes = e.target.findAncestors('Label', true);
+    if (nodes.length > 0) {
+      for (let i = 0; i < nodes.length; i++) {
+        id = nodes[i].getAttr('id');
+      }
+    } else {
+      id = e.target.id();
     }
 
-    const updatedImageClickCoordList = [...imageClickCoordList];
-    updatedImageClickCoordList[id - 1] = { x, y };
-    setImageClickCoordList(updatedImageClickCoordList);
-    localStorage.setItem(
-      'imageClickCoordList',
-      JSON.stringify(updatedImageClickCoordList)
-    );
+    setSelectedSore(sores.find((sore) => sore.id === id));
   };
 
   const handleClickImage = (e: any) => {
     const { x, y } = calculateCoordination(e);
 
-    const newImageClickCoordList = [...imageClickCoordList, { x, y }];
-    setImageClickCoordList(newImageClickCoordList);
+    const newSore: CankerSore = {
+      id: uuidv4(),
+      updated: [new Date()],
+      zone: '',
+      gums: false,
+      size: [3],
+      pain: [3],
+      x,
+      y,
+    };
 
-    const newCircleList = [
-      ...circleList,
-      <Label
-        key={newImageClickCoordList.length}
-        id={`${newImageClickCoordList.length}`}
-        x={x}
-        y={y}
-        draggable
-        onClick={handleClickLabel}
-        onDragEnd={handleDragLabelCoordination}
-      >
-        <Circle width={25} height={25} fill="red" shadowBlur={5} />
-        <Text
-          text={newImageClickCoordList.length.toString()}
-          offsetX={3}
-          offsetY={3}
-        />
-      </Label>,
-    ];
-    setCircleList(newCircleList);
-    localStorage.setItem(
-      'imageClickCoordList',
-      JSON.stringify(newImageClickCoordList)
-    );
+    const newSores = [...sores, newSore];
+
+    setSores(newSores);
+    setSelectedSore(newSore);
   };
 
-  const handleClickLabel = (e: any) => {
-    console.log('click label haha');
-    console.log(e);
-  };
-
-  const confirmDelete = () => {
-    setDeleteCircleList([]);
-    modalToggle();
-  };
-
-  const confirmModalCircleDelete = () => {
-    const updatedImageClickCoordList = [...imageClickCoordList];
-    deleteCircleList.forEach((deleteCircle) => {
-      const deleteCircleIndex = deleteCircle - 1;
-      updatedImageClickCoordList.splice(deleteCircleIndex, 1);
-    });
-    circleListAfterDeleteReload(updatedImageClickCoordList);
-    modalToggle();
+  const handleDeleteButton = () => {
+    const updatedSores = sores.filter((s) => s.id !== selectedSore.id);
+    setSores(updatedSores);
+    setSelectedSore(null);
   };
 
   const handleZoomStage = (event: any) => {
@@ -185,19 +116,6 @@ const ImagePoint: React.FC = () => {
       };
       stage.position(newPos);
       stage.batchDraw();
-    }
-  };
-
-  const modalToggle = () => {
-    setShowModal(!showModal);
-  };
-
-  const toggleCheckboxHandler = (delete_circle: number) => () => {
-    const index = deleteCircleList.indexOf(delete_circle);
-    if (index > -1) {
-      setDeleteCircleList(deleteCircleList.filter((_, i) => i !== index));
-    } else {
-      setDeleteCircleList([...deleteCircleList, delete_circle]);
     }
   };
 
@@ -240,40 +158,25 @@ const ImagePoint: React.FC = () => {
               stageWidth={stageWidth}
               stageHeight={stageHeight}
             />
-            {circleList.length > 0 && circleList.map((curCircle) => curCircle)}
+            {sores.length > 0 &&
+              sores.map((sore) => (
+                <SoreCircle
+                  key={sore.id}
+                  sore={sore}
+                  handleClickLabel={handleClickLabel}
+                  handleDragLabelCoordination={handleDragLabelCoordination}
+                />
+              ))}
           </Group>
         </Layer>
       </Stage>
       <button
-        onClick={confirmDelete}
+        onClick={handleDeleteButton}
         style={{ position: 'absolute', bottom: 10, left: 10, zIndex: 1 }}
+        type="button"
       >
         Delete
       </button>
-
-      <Modal isOpen={showModal} toggle={modalToggle}>
-        <ModalHeader toggle={modalToggle}>Delete Circle Point</ModalHeader>
-        <ModalBody>
-          <ul>
-            {circleList.map((cur, index) => (
-              <CirclePointList
-                key={index}
-                label={index + 1}
-                toggleCheckboxHandler={toggleCheckboxHandler}
-                deleteCircleList={deleteCircleList}
-              />
-            ))}
-          </ul>
-        </ModalBody>
-        <ModalFooter>
-          <Button color="primary" onClick={confirmModalCircleDelete}>
-            Delete
-          </Button>{' '}
-          <Button color="secondary" onClick={modalToggle}>
-            Cancel
-          </Button>
-        </ModalFooter>
-      </Modal>
     </div>
   );
 };

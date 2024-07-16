@@ -1,7 +1,9 @@
 // import { useCankerSores } from "../context/CankerSoresContext";
+import type { RefObject } from 'react';
+import type React from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import React, { RefObject } from 'react';
-import { CankerSore } from "../types";
+
+import type { CankerSore } from '../types';
 
 export const handleFindNearestSoreClick = (
   event: React.MouseEvent<HTMLImageElement, MouseEvent>,
@@ -17,10 +19,10 @@ export const handleFindNearestSoreClick = (
   let nearestSore: CankerSore | null = null;
   let minDistance = Infinity;
 
-  cankerSores.forEach(sore => {
-    const soreX = (sore.xCoordinate ?? 0);
-    const soreY = (sore.yCoordinate ?? 0);
-    const dist = Math.sqrt(Math.pow(X - soreX, 2) + Math.pow(Y - soreY, 2));
+  cankerSores.forEach((sore) => {
+    const soreX = sore.xCoordinate ?? 0;
+    const soreY = sore.yCoordinate ?? 0;
+    const dist = Math.sqrt((X - soreX) ** 2 + (Y - soreY) ** 2);
 
     if (dist < minDistance) {
       minDistance = dist;
@@ -34,21 +36,20 @@ export const handleFindNearestSoreClick = (
 const calcView = (x: number, y: number, height: number, width: number) => {
   if (y < height / 2) {
     if (x < width * 0.33) {
-      return "Left Cheek";
-    } else if (x < width * 0.66) {
-      return "Upper Mouth";
-    } else {
-      return "Right Cheek";
+      return 'Left Cheek';
     }
-  } else {
-    if (x < width * 0.33) {
-      return "Left Jaw";
-    } else if (x < width * 0.66) {
-      return "Lower Mouth";
-    } else {
-      return "Right Jaw";
+    if (x < width * 0.66) {
+      return 'Upper Mouth';
     }
+    return 'Right Cheek';
   }
+  if (x < width * 0.33) {
+    return 'Left Jaw';
+  }
+  if (x < width * 0.66) {
+    return 'Lower Mouth';
+  }
+  return 'Right Jaw';
 };
 
 export const handleAddSoreClick = (
@@ -75,28 +76,21 @@ export const handleAddSoreClick = (
     lastUpdated: [new Date()],
     numberOfDays: 1,
     zone: viewName,
-    gums: gums,
+    gums,
     soreSize: [3],
     painLevel: [3],
     xCoordinate: xPercent,
     yCoordinate: yPercent,
   };
-  
+
   if (zoomed === 1) {
-      setZoomed(2);
-      zoomToSore(xPercent, yPercent);
-
+    setZoomed(2);
+    zoomToSore(xPercent, yPercent);
   } else {
-
     setTimeout(() => {
       zoomToSore(xPercent, yPercent);
-    }, 150)
-    
-
+    }, 150);
   }
 
   setSelectedSore(newSelectedSore);
-
 };
-
-

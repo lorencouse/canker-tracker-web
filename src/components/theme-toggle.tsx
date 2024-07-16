@@ -10,10 +10,10 @@ export function ThemeToggle() {
     <Classic
       toggle={toggleTheme}
       toggled={theme === 'light'}
-      placeholder=""
+      // placeholder=""
       className="text-3xl"
-      onPointerEnterCapture={() => {}}
-      onPointerLeaveCapture={() => {}}
+      // onPointerEnterCapture={() => {}}
+      // onPointerLeaveCapture={() => {}}
     />
   );
 }

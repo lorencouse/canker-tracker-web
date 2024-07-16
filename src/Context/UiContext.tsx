@@ -15,8 +15,8 @@ interface UIContextProps {
   setIsDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
   soresToUpdate: number;
   setSoresToUpdate: React.Dispatch<React.SetStateAction<number>>;
-  cankerSores: CankerSore[];
-  setCankerSores: React.Dispatch<React.SetStateAction<CankerSore[]>>;
+  sores: CankerSore[];
+  setSores: React.Dispatch<React.SetStateAction<CankerSore[]>>;
   selectedSore: CankerSore | null;
   setSelectedSore: React.Dispatch<React.SetStateAction<CankerSore | null>>;
 }
@@ -32,7 +32,7 @@ export const UIProvider: React.FC<UIProviderProps> = ({ children }) => {
   const [dailyLogCompleted, setDailyLogCompleted] = useState<boolean>(true);
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(true);
   const [soresToUpdate, setSoresToUpdate] = useState<number>(0);
-  const [cankerSores, setCankerSores] = useState<CankerSore[]>([]);
+  const [sores, setSores] = useState<CankerSore[]>([]);
   const [selectedSore, setSelectedSore] = useState<CankerSore | null>(null);
 
   useEffect(() => {
@@ -53,8 +53,8 @@ export const UIProvider: React.FC<UIProviderProps> = ({ children }) => {
       setIsDialogOpen,
       soresToUpdate,
       setSoresToUpdate,
-      cankerSores,
-      setCankerSores,
+      sores,
+      setSores,
       selectedSore,
       setSelectedSore,
     }),
@@ -66,8 +66,8 @@ export const UIProvider: React.FC<UIProviderProps> = ({ children }) => {
       setIsDialogOpen,
       soresToUpdate,
       setSoresToUpdate,
-      cankerSores,
-      setCankerSores,
+      sores,
+      setSores,
       selectedSore,
       setSelectedSore,
     ]
