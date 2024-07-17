@@ -1,6 +1,5 @@
-'use client';
-
 import * as React from 'react';
+import { useMemo } from 'react';
 import { Line, LineChart, CartesianGrid, XAxis, YAxis } from 'recharts';
 
 import {
@@ -25,120 +24,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-
-const chartData = [
-  { date: '2024-04-01', sore1: 12, sore2: 5 },
-  { date: '2024-04-02', sore1: 1, sore2: 8 },
-  { date: '2024-04-03', sore1: 17, sore2: 2 },
-  { date: '2024-04-04', sore1: 12, sore2: 6 },
-  { date: '2024-04-05', sore1: 13, sore2: 9 },
-  { date: '2024-04-06', sore1: 11, sore2: 4 },
-  { date: '2024-04-07', sore1: 15, sore2: 8 },
-  { date: '2024-04-08', sore1: 19, sore2: 2 },
-  { date: '2024-04-09', sore1: 1, sore2: 1 },
-  { date: '2024-04-10', sore1: 11, sore2: 9 },
-  { date: '2024-04-11', sore1: 17, sore2: 5 },
-  { date: '2024-04-12', sore1: 12, sore2: 1 },
-  { date: '2024-04-13', sore1: 12, sore2: 8 },
-  { date: '2024-04-14', sore1: 17, sore2: 2 },
-  { date: '2024-04-15', sore1: 10, sore2: 7 },
-  { date: '2024-04-16', sore1: 18, sore2: 9 },
-  { date: '2024-04-17', sore1: 16, sore2: 6 },
-  { date: '2024-04-18', sore1: 14, sore2: 1 },
-  { date: '2024-04-19', sore1: 13, sore2: 8 },
-  { date: '2024-04-20', sore1: 1, sore2: 5 },
-  { date: '2024-04-21', sore1: 17, sore2: 1 },
-  { date: '2024-04-22', sore1: 14, sore2: 7 },
-  { date: '2024-04-23', sore1: 18, sore2: 3 },
-  { date: '2024-04-24', sore1: 17, sore2: 9 },
-  { date: '2024-04-25', sore1: 15, sore2: 5 },
-  { date: '2024-04-26', sore1: 1, sore2: 3 },
-  { date: '2024-04-27', sore1: 13, sore2: 2 },
-  { date: '2024-04-28', sore1: 12, sore2: 8 },
-  { date: '2024-04-29', sore1: 15, sore2: 4 },
-  { date: '2024-04-30', sore1: 14, sore2: 8 },
-  { date: '2024-05-01', sore1: 15, sore2: 2 },
-  { date: '2024-05-02', sore1: 13, sore2: 1 },
-  { date: '2024-05-03', sore1: 17, sore2: 9 },
-  { date: '2024-05-04', sore1: 15, sore2: 2 },
-  { date: '2024-05-05', sore1: 11, sore2: 9 },
-  { date: '2024-05-06', sore1: 18, sore2: 2 },
-  { date: '2024-05-07', sore1: 18, sore2: 1 },
-  { date: '2024-05-08', sore1: 19, sore2: 1 },
-  { date: '2024-05-09', sore1: 17, sore2: 8 },
-  { date: '2024-05-10', sore1: 13, sore2: 3 },
-  { date: '2024-05-11', sore1: 15, sore2: 7 },
-  { date: '2024-05-12', sore1: 17, sore2: 4 },
-  { date: '2024-05-13', sore1: 17, sore2: 6 },
-  { date: '2024-05-14', sore1: 18, sore2: 9 },
-  { date: '2024-05-15', sore1: 13, sore2: 8 },
-  { date: '2024-05-16', sore1: 18, sore2: 1 },
-  { date: '2024-05-17', sore1: 19, sore2: 2 },
-  { date: '2024-05-18', sore1: 15, sore2: 5 },
-  { date: '2024-05-19', sore1: 15, sore2: 8 },
-  { date: '2024-05-20', sore1: 17, sore2: 3 },
-  { date: '2024-05-21', sore1: 1, sore2: 4 },
-  { date: '2024-05-22', sore1: 1, sore2: 2 },
-  { date: '2024-05-23', sore1: 12, sore2: 9 },
-  { date: '2024-05-24', sore1: 14, sore2: 2 },
-  { date: '2024-05-25', sore1: 11, sore2: 5 },
-  { date: '2024-05-26', sore1: 13, sore2: 7 },
-  { date: '2024-05-27', sore1: 10, sore2: 6 },
-  { date: '2024-05-28', sore1: 13, sore2: 9 },
-  { date: '2024-05-29', sore1: 1, sore2: 3 },
-  { date: '2024-05-30', sore1: 10, sore2: 8 },
-  { date: '2024-05-31', sore1: 18, sore2: 3 },
-  { date: '2024-06-01', sore1: 18, sore2: 1 },
-  { date: '2024-06-02', sore1: 10, sore2: 1 },
-  { date: '2024-06-03', sore1: 13, sore2: 6 },
-  { date: '2024-06-04', sore1: 19, sore2: 8 },
-  { date: '2024-06-05', sore1: 1, sore2: 4 },
-  { date: '2024-06-06', sore1: 14, sore2: 5 },
-  { date: '2024-06-07', sore1: 13, sore2: 7 },
-  { date: '2024-06-08', sore1: 15, sore2: 2 },
-  { date: '2024-06-09', sore1: 18, sore2: 8 },
-  { date: '2024-06-10', sore1: 15, sore2: 1 },
-  { date: '2024-06-11', sore1: 1, sore2: 5 },
-  { date: '2024-06-12', sore1: 12, sore2: 2 },
-  { date: '2024-06-13', sore1: 1, sore2: 3 },
-  { date: '2024-06-14', sore1: 16, sore2: 8 },
-  { date: '2024-06-15', sore1: 17, sore2: 5 },
-  { date: '2024-06-16', sore1: 11, sore2: 1 },
-  { date: '2024-06-17', sore1: 15, sore2: 2 },
-  { date: '2024-06-18', sore1: 17, sore2: 7 },
-  { date: '2024-06-19', sore1: 11, sore2: 9 },
-  { date: '2024-06-20', sore1: 18, sore2: 5 },
-  { date: '2024-06-21', sore1: 19, sore2: 1 },
-  { date: '2024-06-22', sore1: 17, sore2: 7 },
-  { date: '2024-06-23', sore1: 10, sore2: 3 },
-  { date: '2024-06-24', sore1: 12, sore2: 8 },
-  { date: '2024-06-25', sore1: 11, sore2: 9 },
-  { date: '2024-06-26', sore1: 14, sore2: 8 },
-  { date: '2024-06-27', sore1: 18, sore2: 9 },
-  { date: '2024-06-28', sore1: 19, sore2: 0 },
-  { date: '2024-06-29', sore1: 13, sore2: 6 },
-  { date: '2024-06-30', sore1: 16, sore2: 0 },
-];
-
-const chartConfig = {
-  visitors: {
-    label: 'Sores',
-  },
-  sore1: {
-    label: 'Sore 1',
-    color: 'hsl(var(--chart-1))',
-  },
-  sore2: {
-    label: 'Sore 2',
-    color: 'hsl(var(--chart-2))',
-  },
-} satisfies ChartConfig;
+import { useUIContext } from '@/Context/UiContext';
 
 export default function ChartHistory() {
+  const { sores } = useUIContext();
   const [timeRange, setTimeRange] = React.useState('90d');
 
-  const filteredData = chartData.filter((item) => {
-    const date = new Date(item.date);
+  const chartData = useMemo(() => {
     const now = new Date();
     let daysToSubtract = 90;
     if (timeRange === '30d') {
@@ -146,9 +38,43 @@ export default function ChartHistory() {
     } else if (timeRange === '7d') {
       daysToSubtract = 7;
     }
-    now.setDate(now.getDate() - daysToSubtract);
-    return date >= now;
-  });
+    const startDate = new Date(
+      now.getTime() - daysToSubtract * 24 * 60 * 60 * 1000
+    );
+
+    const data = {};
+    sores.forEach((sore) => {
+      sore.updated.forEach((date, index) => {
+        const updatedDate = new Date(date);
+        if (updatedDate >= startDate) {
+          const dateString = updatedDate.toISOString().split('T')[0];
+          if (!data[dateString]) {
+            data[dateString] = { date: dateString };
+          }
+          data[dateString][sore.id] = sore.pain[index];
+        }
+      });
+    });
+
+    return Object.values(data).sort(
+      (a, b) => new Date(a.date) - new Date(b.date)
+    );
+  }, [sores, timeRange]);
+
+  const chartConfig = useMemo(() => {
+    const config = {
+      visitors: {
+        label: 'Sores',
+      },
+    };
+    sores.forEach((sore, index) => {
+      config[sore.id] = {
+        label: `Sore ${index + 1}`,
+        color: `hsl(var(--chart-${index + 1}))`,
+      };
+    });
+    return config;
+  }, [sores]);
 
   return (
     <Card>
@@ -182,32 +108,29 @@ export default function ChartHistory() {
           config={chartConfig}
           className="aspect-auto h-[250px] w-full"
         >
-          <LineChart data={filteredData}>
+          <LineChart data={chartData}>
             <defs>
-              <linearGradient id="fillDesktop" x1="0" y1="0" x2="0" y2="1">
-                <stop
-                  offset="5%"
-                  stopColor={chartConfig.sore1.color}
-                  stopOpacity={0.8}
-                />
-                <stop
-                  offset="95%"
-                  stopColor={chartConfig.sore1.color}
-                  stopOpacity={0.1}
-                />
-              </linearGradient>
-              <linearGradient id="fillMobile" x1="0" y1="0" x2="0" y2="1">
-                <stop
-                  offset="5%"
-                  stopColor={chartConfig.sore2.color}
-                  stopOpacity={0.8}
-                />
-                <stop
-                  offset="95%"
-                  stopColor={chartConfig.sore2.color}
-                  stopOpacity={0.1}
-                />
-              </linearGradient>
+              {sores.map((sore, index) => (
+                <linearGradient
+                  key={sore.id}
+                  id={`fill${sore.id}`}
+                  x1="0"
+                  y1="0"
+                  x2="0"
+                  y2="1"
+                >
+                  <stop
+                    offset="5%"
+                    stopColor={chartConfig[sore.id].color}
+                    stopOpacity={0.8}
+                  />
+                  <stop
+                    offset="95%"
+                    stopColor={chartConfig[sore.id].color}
+                    stopOpacity={0.1}
+                  />
+                </linearGradient>
+              ))}
             </defs>
             <CartesianGrid vertical={false} />
             <XAxis
@@ -224,7 +147,9 @@ export default function ChartHistory() {
                 });
               }}
             />
-            <YAxis domain={[1, 10]} />
+            <YAxis
+              domain={[0, Math.max(...sores.flatMap((sore) => sore.pain))]}
+            />
             <ChartTooltip
               cursor={false}
               content={
@@ -236,35 +161,32 @@ export default function ChartHistory() {
                     });
                   }}
                   indicator="dot"
+                  formatter={(value, name) => {
+                    const sore = sores.find((s) => s.id === name);
+                    return [
+                      `Pain: ${value}, Size: ${sore.size[sore.size.length - 1]}mm`,
+                      chartConfig[name].label,
+                    ];
+                  }}
                 />
               }
             />
-            <Line
-              dataKey="sore1"
-              type="natural"
-              stroke={chartConfig.sore1.color}
-              strokeWidth={1}
-              dot={{
-                fill: 'var(--color-desktop)',
-                r: 2,
-              }}
-              activeDot={{
-                r: 10,
-              }}
-            />
-            <Line
-              dataKey="sore2"
-              type="natural"
-              stroke={chartConfig.sore2.color}
-              strokeWidth={1}
-              dot={{
-                fill: 'var(--color-mobile)',
-                r: 2,
-              }}
-              activeDot={{
-                r: 10,
-              }}
-            />
+            {sores.map((sore, index) => (
+              <Line
+                key={sore.id}
+                dataKey={sore.id}
+                type="natural"
+                stroke={chartConfig[sore.id].color}
+                strokeWidth={1}
+                dot={{
+                  fill: `var(--color-sore-${index + 1})`,
+                  r: 2,
+                }}
+                activeDot={{
+                  r: sore.size[sore.size.length - 1],
+                }}
+              />
+            ))}
             <ChartLegend content={<ChartLegendContent />} />
           </LineChart>
         </ChartContainer>
