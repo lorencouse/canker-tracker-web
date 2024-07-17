@@ -1,21 +1,24 @@
+import Konva from 'konva';
 import type React from 'react';
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Stage, Layer, Group } from 'react-konva';
 import { v4 as uuidv4 } from 'uuid';
 
 import SoreCircle from '../SoreComponents/SoreCircle';
 import { useUIContext } from '@/Context/UiContext';
 import type { CankerSore } from '@/types';
+import { calcView } from '@/utilities/ClickHandlers';
 
+import ImagePlotButton from './ImagePlotButton';
 import Images from './Images';
 
 const ImagePoint: React.FC = () => {
   const { sores, setSores, selectedSore, setSelectedSore } = useUIContext();
-  const [image] = useState<string>('/assets/images/mouth.png');
+  const [isGums, setIsGums] = useState<boolean>(false);
+  const [image, setImage] = useState<string>('/assets/images/mouth.png');
   const stageRef = useRef<any>(null);
   const [stageWidth, setStageWidth] = useState<number>(0);
   const [stageHeight, setStageHeight] = useState<number>(0);
-  // const [deleteCircleList, setDeleteCircleList] = useState<number[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -76,8 +79,8 @@ const ImagePoint: React.FC = () => {
     const newSore: CankerSore = {
       id: uuidv4(),
       updated: [new Date()],
-      zone: '',
-      gums: false,
+      zone: calcView(x, y),
+      gums: isGums,
       size: [3],
       pain: [3],
       x,
@@ -94,6 +97,14 @@ const ImagePoint: React.FC = () => {
     const updatedSores = sores.filter((s) => s.id !== selectedSore.id);
     setSores(updatedSores);
     setSelectedSore(null);
+  };
+
+  const handleToggleGums = () => {
+    const newIsGums = !isGums;
+    setIsGums(newIsGums);
+    setImage(
+      newIsGums ? '/assets/images/gums.png' : '/assets/images/mouth.png'
+    );
   };
 
   const handleZoomStage = (event: any) => {
@@ -115,6 +126,44 @@ const ImagePoint: React.FC = () => {
         y: pointerY - mousePointTo.y * newScale,
       };
       stage.position(newPos);
+      stage.batchDraw();
+    }
+  };
+
+  const handleZoom = (zoom: number) => {
+    const scaleBy = zoom;
+    if (stageRef.current !== null) {
+      const stage = stageRef.current;
+      const oldScale = stage.scaleX();
+      const newScale = oldScale * scaleBy;
+
+      const center = {
+        x: stage.width() / 2,
+        y: stage.height() / 2,
+      };
+
+      const newPos = {
+        x: center.x - (center.x - stage.x()) * (newScale / oldScale),
+        y: center.y - (center.y - stage.y()) * (newScale / oldScale),
+      };
+
+      new Konva.Tween({
+        node: stage,
+        duration: 0.3,
+        scaleX: newScale,
+        scaleY: newScale,
+        x: newPos.x,
+        y: newPos.y,
+        easing: Konva.Easings.EaseInOut,
+      }).play();
+    }
+  };
+
+  const handleResetZoom = () => {
+    if (stageRef.current !== null) {
+      const stage = stageRef.current;
+      stage.scale({ x: 1, y: 1 });
+      stage.position({ x: 0, y: 0 });
       stage.batchDraw();
     }
   };
@@ -170,13 +219,24 @@ const ImagePoint: React.FC = () => {
           </Group>
         </Layer>
       </Stage>
-      <button
-        onClick={handleDeleteButton}
-        style={{ position: 'absolute', bottom: 10, left: 10, zIndex: 1 }}
-        type="button"
-      >
-        Delete
-      </button>
+      <div className="absolute right-0 top-0 flex flex-col gap-2">
+        <ImagePlotButton onClick={() => handleZoom(1.25)} label="+" />
+        <ImagePlotButton onClick={() => handleZoom(0.75)} label="-" />
+      </div>
+      <div className="absolute bottom-0 left-0 z-10 flex w-full flex-row justify-between">
+        {selectedSore && (
+          <ImagePlotButton onClick={handleDeleteButton} label="Delete" />
+        )}
+      </div>
+      <div className="zoom-buttons absolute bottom-0 right-0 z-10 flex flex-row">
+        <ImagePlotButton onClick={handleResetZoom} label="Reset" />
+      </div>
+      <div className="zoom-buttons absolute left-0 top-0 z-10 flex flex-row">
+        <ImagePlotButton
+          onClick={handleToggleGums}
+          label={isGums ? 'Mouth' : 'Gums'}
+        />
+      </div>
     </div>
   );
 };

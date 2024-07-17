@@ -17,6 +17,7 @@ const SoreSliders: React.FC = () => {
     const updatedSoreSize = [...soreSize];
     updatedSoreSize[updatedSoreSize.length - 1] = newValue[0];
     setSoreSize(updatedSoreSize);
+
     if (selectedSore) {
       const updatedSelectedSore = { ...selectedSore, size: updatedSoreSize };
       setSelectedSore(updatedSelectedSore);
@@ -33,6 +34,7 @@ const SoreSliders: React.FC = () => {
     const updatedPainLevel = [...painLevel];
     updatedPainLevel[updatedPainLevel.length - 1] = newValue[0];
     setPainLevel(updatedPainLevel);
+
     if (selectedSore) {
       const updatedSelectedSore = { ...selectedSore, pain: updatedPainLevel };
       setSelectedSore(updatedSelectedSore);
@@ -46,19 +48,21 @@ const SoreSliders: React.FC = () => {
   };
 
   useEffect(() => {
-    setSoreSize(initialSoreSize);
-    setPainLevel(initialPainLevel);
-  }, [selectedSore?.id, initialSoreSize, initialPainLevel]);
+    if (selectedSore) {
+      setSoreSize(selectedSore.size);
+      setPainLevel(selectedSore.pain);
+    }
+  }, [selectedSore]);
 
   return (
     <div>
       {selectedSore && (
-        <div className="sliders">
-          <p>
-            id: {selectedSore.id} size: {selectedSore.size}
-          </p>
+        <div className="sliders text-left text-xl">
           <div className="slider-container">
-            <p>Size: {soreSize[soreSize.length - 1]}</p>
+            <p className="my-4">
+              <span className="font-bold">Size:</span>{' '}
+              {soreSize[soreSize.length - 1]}
+            </p>
             <Slider
               min={1}
               max={20}
@@ -66,8 +70,11 @@ const SoreSliders: React.FC = () => {
               onValueChange={handleSizeChange}
             />
           </div>
-          <div className="slider-container">
-            <p>Pain: {painLevel[painLevel.length - 1]}</p>
+          <div className="slider-container my-10">
+            <p className="my-4">
+              <span className="font-bold">Pain:</span>{' '}
+              {painLevel[painLevel.length - 1]}
+            </p>
             <Slider
               min={1}
               max={10}

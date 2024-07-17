@@ -1,6 +1,7 @@
 import type React from 'react';
 import { Circle, Label, Text } from 'react-konva';
 
+import { useUIContext } from '@/Context/UiContext';
 import type { CankerSore } from '@/types';
 
 interface SoreCircleProps {
@@ -22,6 +23,8 @@ const SoreCircle: React.FC<SoreCircleProps> = ({
   const latestSize = sore.size[sore.size.length - 1];
   const latestPain = sore.pain[sore.pain.length - 1];
 
+  const { selectedSore } = useUIContext();
+
   return (
     <Label
       id={`${sore.id}`}
@@ -32,10 +35,12 @@ const SoreCircle: React.FC<SoreCircleProps> = ({
       onClick={handleClickLabel}
     >
       <Circle
-        width={latestSize * 3}
-        height={latestSize * 3}
+        width={latestSize * 2}
+        height={latestSize * 2}
         fill={getColor(latestPain)}
-        shadowBlur={5}
+        shadowBlur={sore.id === selectedSore?.id ? 10 : 0}
+        shadowColor="white"
+        stroke={sore.id === selectedSore?.id ? 'white' : 'transparent'}
       />
     </Label>
   );

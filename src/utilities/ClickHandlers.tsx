@@ -33,20 +33,21 @@ export const handleFindNearestSoreClick = (
   setSelectedSore(nearestSore);
 };
 
-const calcView = (x: number, y: number, height: number, width: number) => {
-  if (y < height / 2) {
-    if (x < width * 0.33) {
+export const calcView = (x: number, y: number) => {
+  const dimensions = 600;
+  if (y < dimensions / 2) {
+    if (x < dimensions * 0.33) {
       return 'Left Cheek';
     }
-    if (x < width * 0.66) {
+    if (x < dimensions * 0.66) {
       return 'Upper Mouth';
     }
     return 'Right Cheek';
   }
-  if (x < width * 0.33) {
+  if (x < dimensions * 0.33) {
     return 'Left Jaw';
   }
-  if (x < width * 0.66) {
+  if (x < dimensions * 0.66) {
     return 'Lower Mouth';
   }
   return 'Right Jaw';

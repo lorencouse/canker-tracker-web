@@ -20,33 +20,37 @@ const SoreDetails: React.FC = () => {
           <h3>Sore Details</h3>
           <ul className="rounded border-2 border-solid border-black">
             <ListItem
-              label="Status: "
-              data={selectedSore.active ? 'Active' : 'Healed'}
+              label="Began: "
+              data={selectedSore.updated[0].toLocaleDateString()}
             />
-            {/* <ListItem label="Started on: " data={selectedSore.lastUpdated[0].toLocaleDateString()} /> */}
-            {selectedSore.lastUpdated.length > 1 && (
+            {selectedSore.updated.length > 1 && (
               <ListItem
                 label="Last Updated: "
-                data={selectedSore.lastUpdated
+                data={selectedSore.updated
                   .map((date) => new Date(date).toLocaleDateString())
                   .join(', ')}
               />
             )}
             <ListItem
-              label="Number of Days: "
-              data={selectedSore.numberOfDays}
-            />
-            <ListItem
               label="Location: "
               data={`${selectedSore.zone} ${selectedSore.gums ? 'on Gums' : ''}`}
             />
-            <ListItem
-              label="Sore Size: "
-              data={selectedSore.soreSize.join(', ')}
-            />
+            <ListItem label="Sore Size: " data={selectedSore.size.join(', ')} />
             <ListItem
               label="Pain Level: "
-              data={selectedSore.painLevel.join(', ')}
+              data={selectedSore.pain.join(', ')}
+            />
+            <ListItem
+              label="X: "
+              data={selectedSore.x.toLocaleString(undefined, {
+                maximumFractionDigits: 2,
+              })}
+            />
+            <ListItem
+              label="Y: "
+              data={selectedSore.y.toLocaleString(undefined, {
+                maximumFractionDigits: 2,
+              })}
             />
           </ul>
         </>
