@@ -7,12 +7,14 @@ import { UIProvider } from '@/Context/UiContext';
 const Home = () => {
   return (
     <UIProvider>
-      <div className="flex min-h-[60vh] flex-row flex-wrap items-center justify-center gap-8 text-center">
-        <div className="col-span-1 h-[600px] w-[600px]">
-          <ImagePoint />
+      <div className="flex w-full flex-row flex-wrap items-center justify-center gap-8 text-center">
+        <div className="flex flex-col">
+          <div className="h-[600px] w-[600px]">
+            <ImagePoint />
+          </div>
+          <SoreSliders />
         </div>
         <div className="col-span-1">
-          <SoreSliders />
           <SoreDetails />
           <ChartHistory />
         </div>

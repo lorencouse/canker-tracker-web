@@ -77,118 +77,122 @@ export default function ChartHistory() {
   }, [sores]);
 
   return (
-    <Card>
-      <CardHeader className="flex items-center gap-2 space-y-0 border-b py-5 sm:flex-row">
-        <div className="grid flex-1 gap-1 text-center sm:text-left">
-          <CardTitle>History</CardTitle>
-        </div>
-        <CardDescription>Showing sores for</CardDescription>
-        <Select value={timeRange} onValueChange={setTimeRange}>
-          <SelectTrigger
-            className="w-[160px] rounded-lg sm:ml-auto"
-            aria-label="Select a value"
-          >
-            <SelectValue placeholder="Last 3 months" />
-          </SelectTrigger>
-          <SelectContent className="rounded-xl">
-            <SelectItem value="90d" className="rounded-lg">
-              Last 3 months
-            </SelectItem>
-            <SelectItem value="30d" className="rounded-lg">
-              Last 30 days
-            </SelectItem>
-            <SelectItem value="7d" className="rounded-lg">
-              Last 7 days
-            </SelectItem>
-          </SelectContent>
-        </Select>
-      </CardHeader>
-      <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
-        <ChartContainer
-          config={chartConfig}
-          className="aspect-auto h-[250px] w-full"
-        >
-          <LineChart data={chartData}>
-            <defs>
-              {sores.map((sore, index) => (
-                <linearGradient
-                  key={sore.id}
-                  id={`fill${sore.id}`}
-                  x1="0"
-                  y1="0"
-                  x2="0"
-                  y2="1"
-                >
-                  <stop
-                    offset="5%"
-                    stopColor={chartConfig[sore.id].color}
-                    stopOpacity={0.8}
-                  />
-                  <stop
-                    offset="95%"
-                    stopColor={chartConfig[sore.id].color}
-                    stopOpacity={0.1}
-                  />
-                </linearGradient>
-              ))}
-            </defs>
-            <CartesianGrid vertical={false} />
-            <XAxis
-              dataKey="date"
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-              minTickGap={32}
-              tickFormatter={(value) => {
-                const date = new Date(value);
-                return date.toLocaleDateString('en-US', {
-                  month: 'short',
-                  day: 'numeric',
-                });
-              }}
-            />
-            <YAxis domain={[0, 10]} />
-            <ChartTooltip
-              cursor={false}
-              content={
-                <ChartTooltipContent
-                  labelFormatter={(value) => {
-                    return new Date(value).toLocaleDateString('en-US', {
+    <div className="sore-history">
+      {sores && sores.length > 0 && (
+        <Card>
+          <CardHeader className="flex items-center gap-2 space-y-0 border-b py-5 sm:flex-row">
+            <div className="grid flex-1 gap-1 text-center sm:text-left">
+              <CardTitle>History</CardTitle>
+            </div>
+            <CardDescription>Showing sores for</CardDescription>
+            <Select value={timeRange} onValueChange={setTimeRange}>
+              <SelectTrigger
+                className="w-[160px] rounded-lg sm:ml-auto"
+                aria-label="Select a value"
+              >
+                <SelectValue placeholder="Last 3 months" />
+              </SelectTrigger>
+              <SelectContent className="rounded-xl">
+                <SelectItem value="90d" className="rounded-lg">
+                  Last 3 months
+                </SelectItem>
+                <SelectItem value="30d" className="rounded-lg">
+                  Last 30 days
+                </SelectItem>
+                <SelectItem value="7d" className="rounded-lg">
+                  Last 7 days
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </CardHeader>
+          <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
+            <ChartContainer
+              config={chartConfig}
+              className="aspect-auto h-[250px] w-full"
+            >
+              <LineChart data={chartData}>
+                <defs>
+                  {sores.map((sore, index) => (
+                    <linearGradient
+                      key={sore.id}
+                      id={`fill${sore.id}`}
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1"
+                    >
+                      <stop
+                        offset="5%"
+                        stopColor={chartConfig[sore.id].color}
+                        stopOpacity={0.8}
+                      />
+                      <stop
+                        offset="95%"
+                        stopColor={chartConfig[sore.id].color}
+                        stopOpacity={0.1}
+                      />
+                    </linearGradient>
+                  ))}
+                </defs>
+                <CartesianGrid vertical={false} />
+                <XAxis
+                  dataKey="date"
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={8}
+                  minTickGap={32}
+                  tickFormatter={(value) => {
+                    const date = new Date(value);
+                    return date.toLocaleDateString('en-US', {
                       month: 'short',
                       day: 'numeric',
                     });
                   }}
-                  indicator="dot"
-                  formatter={(value, name) => {
-                    const sore = sores.find((s) => s.id === name);
-                    return [
-                      `Pain: ${value}, Size: ${sore.size[sore.size.length - 1]}mm`,
-                      chartConfig[name].label,
-                    ];
-                  }}
                 />
-              }
-            />
-            {sores.map((sore, index) => (
-              <Line
-                key={sore.id}
-                dataKey={sore.id}
-                type="natural"
-                stroke={chartConfig[sore.id].color}
-                strokeWidth={1}
-                dot={{
-                  fill: `var(--color-sore-${index + 1})`,
-                  r: 2,
-                }}
-                activeDot={{
-                  r: sore.size[sore.size.length - 1],
-                }}
-              />
-            ))}
-            <ChartLegend content={<ChartLegendContent />} />
-          </LineChart>
-        </ChartContainer>
-      </CardContent>
-    </Card>
+                <YAxis domain={[0, 10]} />
+                <ChartTooltip
+                  cursor={false}
+                  content={
+                    <ChartTooltipContent
+                      labelFormatter={(value) => {
+                        return new Date(value).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                        });
+                      }}
+                      indicator="dot"
+                      formatter={(value, name) => {
+                        const sore = sores.find((s) => s.id === name);
+                        return [
+                          `Pain: ${value}, Size: ${sore.size[sore.size.length - 1]}mm`,
+                          chartConfig[name].label,
+                        ];
+                      }}
+                    />
+                  }
+                />
+                {sores.map((sore, index) => (
+                  <Line
+                    key={sore.id}
+                    dataKey={sore.id}
+                    type="natural"
+                    stroke={chartConfig[sore.id].color}
+                    strokeWidth={1}
+                    dot={{
+                      fill: `var(--color-sore-${index + 1})`,
+                      r: 2,
+                    }}
+                    activeDot={{
+                      r: sore.size[sore.size.length - 1],
+                    }}
+                  />
+                ))}
+                <ChartLegend content={<ChartLegendContent />} />
+              </LineChart>
+            </ChartContainer>
+          </CardContent>
+        </Card>
+      )}
+    </div>
   );
 }

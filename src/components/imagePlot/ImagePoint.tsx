@@ -14,7 +14,7 @@ import {
 import SoreCircle from '../SoreComponents/SoreCircle';
 import { Button } from '../ui/button';
 import { useUIContext } from '@/Context/UiContext';
-import { deleteSore, saveSore } from '@/services/firestoreService';
+import { deleteSore, loadSores, saveData } from '@/services/firestoreService';
 import type { CankerSore } from '@/types';
 import { calcView } from '@/utilities/ClickHandlers';
 
@@ -32,16 +32,26 @@ const ImagePoint: React.FC = () => {
   const [mode, setMode] = useState<'add' | 'edit' | 'view'>('view');
 
   useEffect(() => {
-    const jsonSores = JSON.parse(localStorage.getItem('sores') || '[]');
+    const jsonSores = JSON.parse(localStorage.getItem('activesores') || '[]');
     if (jsonSores.length) {
       setSores(jsonSores);
     }
+
+    // const fetchSores = async () => {
+    //   const userId = auth.currentUser?.uid;
+    //   if (!userId) return;
+    //   const activeSores = await loadSores('activesores');
+    //   setSores(activeSores);
+    // };
+
+    // fetchSores();
   }, []);
 
   const handleDragLabelCoordination = (e: any) => {
     if (mode === 'add' || mode === 'edit') {
       const { x, y } = calculateCoordination(e);
       const id = e.target.id() || e.target.findAncestor('Label')?.attrs.id;
+      setSelectedSore(sores.find((sore) => sore.id === id));
       const updatedSores = sores.map((sore) =>
         sore.id === id ? { ...sore, x, y } : sore
       );
@@ -73,8 +83,8 @@ const ImagePoint: React.FC = () => {
       const newSores = [...sores, newSore];
       setSores(newSores);
       setSelectedSore(newSore);
-      localStorage.setItem('sores', JSON.stringify(newSores));
-      saveSore('sores', newSore);
+      // localStorage.setItem('activesores', JSON.stringify(newSores));
+      // saveSore('activesores', newSore);
     }
   };
 
@@ -84,29 +94,28 @@ const ImagePoint: React.FC = () => {
     setSelectedSore(null);
   };
 
-  const handleUpdate = async () => {
+  // const handleUpdate = async () => {
+  //   setMode('view');
+  //   await Promise.all(
+  //     sores.map((sore) => saveData('activesores', sore.id, sore))
+  //   );
+  //   setSelectedSore(null);
+  // };
+
+  const handleFinishAdd = async () => {
     setMode('view');
     await Promise.all(
       sores.map((sore) => saveData('activesores', sore.id, sore))
     );
-    setOriginalSores(sores);
-  };
-
-  const handleFinishAdd = async () => {
-    const newSores = sores.filter(
-      (sore) => !originalSores.some((origSore) => origSore.id === sore.id)
-    );
-    await Promise.all(newSores.map((sore) => saveSore('activesores', sore)));
-    setMode('view');
-    setOriginalSores(sores);
+    setSelectedSore(null);
   };
 
   const handleDeleteButton = () => {
     const updatedSores = sores.filter((s) => s.id !== selectedSore.id);
     setSores(updatedSores);
     setSelectedSore(null);
-    localStorage.setItem('sores', JSON.stringify(updatedSores));
-    deleteSore(selectedSore.id);
+    localStorage.setItem('activesores', JSON.stringify(updatedSores));
+    deleteSore('activesores', selectedSore.id);
   };
 
   const handleToggleGums = () => {
@@ -120,7 +129,8 @@ const ImagePoint: React.FC = () => {
   return (
     <div
       ref={containerRef}
-      style={{ width: '100%', height: '100%', position: 'relative' }}
+      // style={{ width: '100%', height: '100%', position: 'relative' }}
+      className="border-1 border-grey width-full relative h-full rounded-2xl"
     >
       <Stage
         style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
@@ -142,6 +152,7 @@ const ImagePoint: React.FC = () => {
               <SoreCircle
                 key={sore.id}
                 sore={sore}
+                mode={mode}
                 handleClickLabel={handleClickLabel}
                 handleDragLabelCoordination={handleDragLabelCoordination}
               />
@@ -183,19 +194,20 @@ const ImagePoint: React.FC = () => {
             >
               Add
             </Button>
-            <Button
-              onClick={() => {
-                setMode('edit');
-                setOriginalSores(sores);
-              }}
-            >
-              Edit
-            </Button>
+            {sores.length > 0 && (
+              <Button
+                onClick={() => {
+                  setMode('edit');
+                  setOriginalSores(sores);
+                }}
+              >
+                Edit
+              </Button>
+            )}
           </>
         )}
         {mode !== 'view' && <Button onClick={handleCancel}>Cancel</Button>}
-        {mode === 'edit' && <Button onClick={handleUpdate}>Update</Button>}
-        {mode === 'add' && <Button onClick={handleFinishAdd}>Finish</Button>}
+        {mode !== 'view' && <Button onClick={handleFinishAdd}>Finish</Button>}
       </div>
     </div>
   );

@@ -7,6 +7,7 @@ import {
   writeBatch,
   getDoc,
   FirestoreError,
+  Timestamp,
 } from 'firebase/firestore';
 
 import { db } from '../firebaseConfig';
@@ -39,22 +40,23 @@ export const loadSores = async (
     const cankerSores: CankerSore[] = querySnapshot.docs.map((doc) => {
       const data = doc.data();
 
-      const lastUpdated =
-        data.lastUpdated?.map((timestamp: { toDate: () => Date }) =>
-          timestamp.toDate()
-        ) || [];
+      const updated =
+        data.updated?.map((timestamp: Timestamp | Date) => {
+          if (timestamp instanceof Timestamp) {
+            return timestamp.toDate();
+          }
+          return new Date(timestamp);
+        }) || [];
 
       return {
         id: doc.id,
-        active: data.active,
-        lastUpdated,
-        numberOfDays: data.numberOfDays,
+        updated,
         zone: data.zone,
         gums: data.gums,
-        soreSize: data.soreSize,
-        painLevel: data.painLevel,
-        xCoordinate: data.xCoordinate,
-        yCoordinate: data.yCoordinate,
+        size: data.size,
+        painLevel: data.pain,
+        x: data.x,
+        y: data.y,
       };
     });
 

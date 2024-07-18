@@ -4,14 +4,9 @@ import { Circle, Label } from 'react-konva';
 import { useUIContext } from '@/Context/UiContext';
 import type { CankerSore } from '@/types';
 
-interface SoreCircleProps {
-  sore: CankerSore;
-  handleDragLabelCoordination: (e: any) => void;
-  handleClickLabel: (e: any) => void;
-}
-
 const SoreCircle: React.FC<SoreCircleProps> = ({
   sore,
+  mode,
   handleDragLabelCoordination,
   handleClickLabel,
 }) => {
@@ -30,7 +25,7 @@ const SoreCircle: React.FC<SoreCircleProps> = ({
       id={`${sore.id}`}
       x={sore.x}
       y={sore.y}
-      draggable
+      draggable={mode === 'add' || mode === 'edit'}
       onDragEnd={handleDragLabelCoordination}
       onClick={handleClickLabel}
     >
