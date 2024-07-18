@@ -147,9 +147,7 @@ export default function ChartHistory() {
                 });
               }}
             />
-            <YAxis
-              domain={[0, Math.max(...sores.flatMap((sore) => sore.pain))]}
-            />
+            <YAxis domain={[0, 10]} />
             <ChartTooltip
               cursor={false}
               content={

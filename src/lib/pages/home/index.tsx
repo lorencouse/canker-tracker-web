@@ -1,4 +1,3 @@
-import ChartDots from '@/components/Charts/ChartDots';
 import ChartHistory from '@/components/Charts/ChartHistory';
 import ImagePoint from '@/components/imagePlot/ImagePoint';
 import { SoreDetails } from '@/components/SoreComponents/SoreDetails';
@@ -16,7 +15,6 @@ const Home = () => {
           <SoreSliders />
           <SoreDetails />
           <ChartHistory />
-          <ChartDots />
         </div>
       </div>
     </UIProvider>

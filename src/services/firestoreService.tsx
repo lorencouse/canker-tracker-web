@@ -78,6 +78,20 @@ export const deleteSore = async (collectionPath: string, soreId: string) => {
   }
 };
 
+export const saveSore = async (collectionPath: string, sore: CankerSore) => {
+  try {
+    const soreCollectionRef = collection(db, collectionPath);
+    const docRef = await addDoc(soreCollectionRef, sore);
+    console.log(
+      `CankerSore with ID ${docRef.id} has been added to ${collectionPath}.`
+    );
+    return docRef.id;
+  } catch (error) {
+    console.error('Error saving CankerSore:', error);
+    throw error;
+  }
+};
+
 export const clearAllSores = async (collectionPath: string) => {
   try {
     const querySnapshot = await getDocs(collection(db, collectionPath));

@@ -21,7 +21,7 @@ const SoreDetails: React.FC = () => {
           <ul className="rounded border-2 border-solid border-black">
             <ListItem
               label="Began: "
-              data={selectedSore.updated[0].toLocaleDateString()}
+              data={new Date(selectedSore.updated[0]).toLocaleDateString()}
             />
             {selectedSore.updated.length > 1 && (
               <ListItem

@@ -1,5 +1,5 @@
 import type React from 'react';
-import { Circle, Label, Text } from 'react-konva';
+import { Circle, Label } from 'react-konva';
 
 import { useUIContext } from '@/Context/UiContext';
 import type { CankerSore } from '@/types';
