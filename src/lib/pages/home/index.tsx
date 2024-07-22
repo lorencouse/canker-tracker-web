@@ -1,3 +1,5 @@
+import { useState } from 'react';
+
 import ChartHistory from '@/components/Charts/ChartHistory';
 import ImagePoint from '@/components/imagePlot/ImagePoint';
 import { SoreDetails } from '@/components/SoreComponents/SoreDetails';
@@ -5,18 +7,22 @@ import SoreSliders from '@/components/SoreComponents/SoreSliders';
 import { UIProvider } from '@/Context/UiContext';
 
 const Home = () => {
+  const [mode, setMode] = useState<'add' | 'edit' | 'view'>('view');
+
   return (
     <UIProvider>
-      <div className="flex w-full flex-row flex-wrap items-center justify-center gap-8 text-center">
-        <div className="flex flex-col">
-          <div className="h-[600px] w-[600px]">
-            <ImagePoint />
+      <div className="md:mx-10">
+        <div className="flex min-h-screen w-full flex-col content-start md:flex-row">
+          <div className="w-full p-4 md:w-1/2">
+            <div className="relative aspect-square w-full">
+              <ImagePoint mode={mode} setMode={setMode} />
+            </div>
           </div>
-          <SoreSliders />
-        </div>
-        <div className="col-span-1">
-          <SoreDetails />
-          <ChartHistory />
+          <div className="flex w-full flex-col justify-center self-start p-4 align-top md:w-1/2">
+            {mode !== 'view' && <SoreSliders />}
+            {mode === 'view' && <ChartHistory />}
+            <SoreDetails />
+          </div>
         </div>
       </div>
     </UIProvider>

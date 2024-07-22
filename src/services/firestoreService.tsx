@@ -30,6 +30,29 @@ export const saveData = async (
   }
 };
 
+export const saveSores = async (sores: CankerSore[]) => {
+  try {
+    const soresCollection = collection(db, 'activesores');
+
+    const promises = sores.map((sore) => {
+      const soreDoc = doc(soresCollection, sore.id);
+      const soreData = {
+        ...sore,
+        updated: sore.updated.map((date) =>
+          date instanceof Date ? date : new Date(date)
+        ),
+      };
+      return setDoc(soreDoc, soreData);
+    });
+
+    await Promise.all(promises);
+    console.log('All sores have been successfully saved.');
+  } catch (e) {
+    console.error('Error saving sores: ', e);
+    throw e;
+  }
+};
+
 export const loadSores = async (
   collectionPath: string
 ): Promise<CankerSore[]> => {
@@ -51,12 +74,12 @@ export const loadSores = async (
       return {
         id: doc.id,
         updated,
-        zone: data.zone,
-        gums: data.gums,
-        size: data.size,
-        painLevel: data.pain,
-        x: data.x,
-        y: data.y,
+        zone: data.zone ?? '',
+        gums: data.gums ?? false,
+        size: data.size ?? [],
+        pain: data.pain ?? [],
+        x: data.x ?? 0,
+        y: data.y ?? 0,
       };
     });
 

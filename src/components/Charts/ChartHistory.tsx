@@ -111,7 +111,7 @@ export default function ChartHistory() {
               className="aspect-auto h-[250px] w-full"
             >
               <LineChart data={chartData}>
-                <defs>
+                <defs className="flex flex-row flex-wrap">
                   {sores.map((sore, index) => (
                     <linearGradient
                       key={sore.id}
