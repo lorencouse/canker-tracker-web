@@ -1,16 +1,27 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card'
-import React from 'react'
-import { Link } from 'react-router-dom'
-import { Button } from '../ui/button'
-import { Input } from '../ui/input'
-import { Label } from '../ui/label'
+import React from 'react';
+import { Link } from 'react-router-dom';
+
+import { Button } from '../ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '../ui/card';
+import { Input } from '../ui/input';
+import { Label } from '../ui/label';
+
+import GoogleSignInBox from './GoogleSignUpBox';
 
 export default function SignUpForm() {
   return (
     <Card className="mx-auto max-w-sm">
       <CardHeader>
         <CardTitle className="text-xl">Sign Up</CardTitle>
-        <CardDescription>Enter your information to create an account</CardDescription>
+        <CardDescription>
+          Enter your information to create an account
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <div>
@@ -27,7 +38,12 @@ export default function SignUpForm() {
             </div>
             <div className="grid gap-2">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="m@example.com" required />
+              <Input
+                id="email"
+                type="email"
+                placeholder="m@example.com"
+                required
+              />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="password">Password</Label>
@@ -36,18 +52,19 @@ export default function SignUpForm() {
             <Button type="submit" className="w-full">
               Create an account
             </Button>
-            <Button variant="outline" className="w-full">
-              Sign up with GitHub
-            </Button>
+            <GoogleSignInBox />
+            {/* <Button variant="outline" className="w-full">
+              Sign up with Google
+            </Button> */}
           </div>
-          <div className="mt-4 text-center text-sm">
+          {/* <div className="mt-4 text-center text-sm">
             Already have an account?{' '}
             <Link to="#" className="underline">
               Sign in
             </Link>
-          </div>
+          </div> */}
         </div>{' '}
       </CardContent>
     </Card>
-  )
+  );
 }

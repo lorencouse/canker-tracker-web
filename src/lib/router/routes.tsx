@@ -1,7 +1,8 @@
 import React from 'react';
 import type { PathRouteProps } from 'react-router-dom';
 
-import SignInUp from '@/components/LogInComponents/SignInUp';
+import SignInPage from '../pages/SignInPage';
+import SettingsPage from '@/components/userDashboard/settingsPage';
 
 const Home = React.lazy(() => import('@/lib/pages/home'));
 
@@ -11,8 +12,12 @@ export const routes: Array<PathRouteProps> = [
     element: <Home />,
   },
   {
-    path: '/signin',
-    element: <SignInUp signIn />,
+    path: '/sign-in',
+    element: <SignInPage signIn />,
+  },
+  {
+    path: '/settings',
+    element: <SettingsPage />,
   },
 ];
 

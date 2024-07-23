@@ -3,17 +3,16 @@ import '@theme-toggles/react/css/Classic.css';
 
 import { useTheme } from '@/components/theme-provider';
 
-export function ThemeToggle() {
+function ThemeToggle() {
   const { toggleTheme, theme } = useTheme();
 
   return (
     <Classic
       toggle={toggleTheme}
       toggled={theme === 'light'}
-      // placeholder=""
-      className="text-3xl"
-      // onPointerEnterCapture={() => {}}
-      // onPointerLeaveCapture={() => {}}
+      className="mx-4 text-3xl"
     />
   );
 }
+
+export default ThemeToggle;

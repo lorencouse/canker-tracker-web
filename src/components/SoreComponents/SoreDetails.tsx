@@ -72,8 +72,8 @@ const SoreDetails: React.FC = () => {
                     selectedSore.pain[selectedSore.pain.length - 1]
                   ),
                   borderRadius: '50%',
-                  boxShadow: '0 0 10px white',
-                  border: '2px solid white',
+                  boxShadow: '0 0 10px foreground',
+                  border: '2px solid foreground',
                 }}
               />
             </div>

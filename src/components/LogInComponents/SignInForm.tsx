@@ -1,11 +1,34 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card'
-import React from 'react'
-import { Link } from 'react-router-dom'
-import { Button } from '../ui/button'
-import { Input } from '../ui/input'
-import { Label } from '../ui/label'
+import type React from 'react';
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+
+import { logInEmail } from '../../services/authService';
+import { Button } from '../ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '../ui/card';
+import { Input } from '../ui/input';
+import { Label } from '../ui/label';
+
+import GoogleSignInBox from './GoogleSignUpBox';
 
 export default function SignInForm() {
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const handleLogIn = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    try {
+      await logInEmail(email, password);
+      navigate('/');
+    } catch (error: any) {
+      setError(error.message);
+    }
+  };
+
   return (
     <Card className="mx-auto min-w-[350px]">
       <CardHeader>
@@ -17,32 +40,40 @@ export default function SignInForm() {
           <div className="grid gap-4">
             <div className="grid gap-2">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="m@example.com" required />
+              <Input
+                id="email"
+                type="email"
+                placeholder="m@example.com"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
             </div>
             <div className="grid gap-2">
               <div className="flex items-center">
                 <Label htmlFor="password">Password</Label>
-                <Link to="/forgot-password" className="ml-auto inline-block text-sm underline">
+                <Link
+                  to="/forgot-password"
+                  className="ml-auto inline-block text-sm underline"
+                >
                   Forgot your password?
                 </Link>
               </div>
-              <Input id="password" type="password" required />
+              <Input
+                id="password"
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
             </div>
-            <Button type="submit" className="w-full">
+            <Button onClick={handleLogIn} className="w-full">
               Login
             </Button>
-            <Button variant="outline" className="w-full">
-              Login with Google
-            </Button>
-          </div>
-          <div className="mt-4 text-center text-sm">
-            Don&apos;t have an account?{' '}
-            <Link to="#" className="underline">
-              Sign up
-            </Link>
+            <GoogleSignInBox />
           </div>
         </div>{' '}
       </CardContent>
     </Card>
-  )
+  );
 }
