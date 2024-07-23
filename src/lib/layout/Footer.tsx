@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 
 import { YoutubeIcon, GithubIcon, TwitterIcon } from '@/components/Svg';
 
-export default function Component() {
+export default function Footer() {
   return (
     <div className="dark bg-gray-900 py-8 text-white">
       <div className="container mx-auto flex flex-col items-center justify-between px-4 md:flex-row md:px-6">
@@ -33,7 +33,7 @@ export default function Component() {
           </Link>
         </div>
         <p className="mt-4 text-sm text-gray-300 md:mt-0">
-          &copy; 2024 Acme Inc. All rights reserved.
+          &copy; 2024 Canker Tracker Inc. All rights reserved.
         </p>
       </div>
     </div>
