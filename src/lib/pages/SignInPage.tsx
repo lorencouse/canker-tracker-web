@@ -1,18 +1,24 @@
 import { Image } from 'lucide-react';
 import { useState } from 'react';
 
-import SignInForm from '../../components/LogInComponents/SignInForm';
-import SignUpForm from '../../components/LogInComponents/SignUpForm';
+import SignInBox from '../../components/LogInComponents/SignInBox';
+import SignUpBox from '../../components/LogInComponents/SignUpBox';
+import PasswordResetBox from '@/components/LogInComponents/PasswordResetBox';
 
 export default function SignInPage() {
-  const [signInForm, setSignInForm] = useState(true);
+  const [mode, setMode] = useState<'signin' | 'signup' | 'resetPassword'>(
+    'signin'
+  );
   return (
     <div className="w-full lg:grid lg:min-h-[600px] lg:grid-cols-2 xl:min-h-[800px]">
       <div className="flex flex-col items-center justify-center py-12">
         <div className="mx-auto grid w-[350px] gap-6">
-          {signInForm ? <SignInForm /> : <SignUpForm />}
+          {mode === 'signin' && <SignInBox setMode={setMode} />}
+          {mode === 'signup' && <SignUpBox setMode={setMode} />}
+          {mode === 'resetPassword' && <PasswordResetBox setMode={setMode} />}
         </div>
-        <p className="my-4">
+
+        {/* <p className="my-4">
           {signInForm ? "Don't have an account?" : 'Already have an account?'}
           <span
             onClick={() => setSignInForm(!signInForm)}
@@ -20,7 +26,7 @@ export default function SignInPage() {
           >
             {signInForm ? 'Sign up' : 'Sign in'}
           </span>
-        </p>
+        </p> */}
       </div>
       <div className="hidden bg-muted lg:block">
         <Image

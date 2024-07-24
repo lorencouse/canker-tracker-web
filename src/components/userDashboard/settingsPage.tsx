@@ -15,10 +15,6 @@ const sidebarNavItems = [
     component: <ProfileForm />,
   },
   {
-    title: 'Account',
-    component: <SettingsAccountPage />,
-  },
-  {
     title: 'Appearance',
     component: <SettingsAppearancePage />,
   },

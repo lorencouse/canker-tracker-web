@@ -1,12 +1,23 @@
-'use client';
-
 import { zodResolver } from '@hookform/resolvers/zod';
+import { CalendarIcon, CaretSortIcon, CheckIcon } from '@radix-ui/react-icons';
+import { format } from 'date-fns';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { useState, useEffect } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
+import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { Link, useNavigate } from 'react-router-dom';
 import * as z from 'zod';
 
 import { cn } from '../../lib/utils';
 import { Button } from '../ui/button';
+import { Calendar } from '../ui/calendar';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from '../ui/command';
 import {
   Form,
   FormControl,
@@ -17,6 +28,7 @@ import {
   FormMessage,
 } from '../ui/form';
 import { Input } from '../ui/input';
+import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import {
   Select,
   SelectContent,
@@ -26,22 +38,12 @@ import {
 } from '../ui/select';
 import { Textarea } from '../ui/textarea';
 import { toast } from '../ui/use-toast';
-import { auth } from '@/firebaseConfig';
+import { auth, db } from '@/firebaseConfig';
 
 const profileFormSchema = z.object({
-  username: z
-    .string()
-    .min(2, {
-      message: 'Username must be at least 2 characters.',
-    })
-    .max(30, {
-      message: 'Username must not be longer than 30 characters.',
-    }),
-  email: z
-    .string({
-      required_error: 'Please select an email to display.',
-    })
-    .email(),
+  email: z.string().email().min(2, {
+    message: 'Email must be at least 2 characters.',
+  }),
   bio: z.string().max(160).min(4),
   urls: z
     .array(
@@ -50,21 +52,46 @@ const profileFormSchema = z.object({
       })
     )
     .optional(),
+  name: z
+    .string()
+    .min(2, {
+      message: 'Name must be at least 2 characters.',
+    })
+    .max(30, {
+      message: 'Name must not be longer than 30 characters.',
+    }),
+  dob: z.date({
+    required_error: 'A date of birth is required.',
+  }),
+  language: z.string({
+    required_error: 'Please select a language.',
+  }),
 });
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
-// This can come from your database or API.
 const defaultValues: Partial<ProfileFormValues> = {
-  bio: 'I own a computer.',
-  urls: [
-    { value: 'https://shadcn.com' },
-    { value: 'http://twitter.com/shadcn' },
-  ],
+  bio: '',
+  urls: [{ value: 'https://cankertracker.com' }],
+  dob: new Date('1990-01-01'),
 };
+
+const languages = [
+  { label: 'English', value: 'en' },
+  { label: 'Français', value: 'fr' },
+  { label: 'Deutsch', value: 'de' },
+  { label: 'Español', value: 'es' },
+  { label: 'Português', value: 'pt' },
+  { label: 'Русский', value: 'ru' },
+  { label: '日本語', value: 'ja' },
+  { label: '한국어', value: 'ko' },
+  { label: '中文', value: 'zh' },
+] as const;
 
 function ProfileForm() {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string>('');
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
@@ -77,22 +104,53 @@ function ProfileForm() {
     control: form.control,
   });
 
-  function onSubmit(data: ProfileFormValues) {
-    toast({
-      title: 'You submitted the following values:',
-      description: (
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-    });
-  }
+  const fetchUserData = async () => {
+    try {
+      const user = auth.currentUser;
+      if (user) {
+        const userDocRef = doc(db, 'users', user.uid);
+        const userDoc = await getDoc(userDocRef);
+        if (userDoc.exists()) {
+          form.reset({
+            ...userDoc.data(),
+            dob: userDoc.data().dob?.toDate(),
+            language: userDoc.data().language,
+          });
+        }
+      }
+    } catch (err) {
+      setError('Failed to load user data.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUserData();
+  }, []);
+
+  const onSubmit = async (data: ProfileFormValues) => {
+    setLoading(true);
+    try {
+      const user = auth.currentUser;
+      if (user) {
+        const userDocRef = doc(db, 'users', user.uid);
+        await setDoc(userDocRef, data, { merge: true });
+        toast({
+          title: 'Profile updated successfully',
+        });
+        await fetchUserData(); // Fetch the updated data after form submission
+      }
+    } catch (err) {
+      setError('Failed to update profile.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSignOut = async () => {
     try {
       await auth.signOut();
-      // setSelectedSore(null);
-      // setCankerSores([]);
       navigate('/');
     } catch (error) {
       console.error('Error signing out: ', error);
@@ -102,18 +160,125 @@ function ProfileForm() {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        {error && <p style={{ color: 'red' }}>{error}</p>}
         <FormField
           control={form.control}
-          name="username"
+          name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Username</FormLabel>
+              <FormLabel>Name</FormLabel>
               <FormControl>
-                <Input placeholder="shadcn" {...field} />
+                <Input placeholder="Your name" {...field} />
               </FormControl>
               <FormDescription>
-                This is your public display name. It can be your real name or a
-                pseudonym. You can only change this once every 30 days.
+                This is the name that will be displayed on your profile and in
+                emails.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="dob"
+          render={({ field }) => (
+            <FormItem className="flex flex-col">
+              <FormLabel>Date of Birth</FormLabel>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      'w-[240px] justify-start text-left font-normal',
+                      !field.value && 'text-muted-foreground'
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {field.value ? (
+                      format(field.value, 'PPP')
+                    ) : (
+                      <span>Pick a date</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent align="start" className="w-auto p-0">
+                  <Calendar
+                    mode="single"
+                    captionLayout="dropdown-buttons"
+                    selected={field.value ?? new Date('1990-01-01')}
+                    onSelect={field.onChange}
+                    disabled={(date) =>
+                      date >= new Date('2012-01-01') ||
+                      date < new Date('1930-01-01')
+                    }
+                    initialFocus
+                    fromYear={1930}
+                    toYear={2010}
+                  />
+                </PopoverContent>
+              </Popover>
+              <FormDescription>
+                Your date of birth is used to calculate your age.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="language"
+          render={({ field }) => (
+            <FormItem className="flex flex-col">
+              <FormLabel>Language</FormLabel>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      className={cn(
+                        'w-[200px] justify-between',
+                        !field.value && 'text-muted-foreground'
+                      )}
+                    >
+                      {field.value
+                        ? languages.find(
+                            (language) => language.value === field.value
+                          )?.label
+                        : 'Select language'}
+                      <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-[200px] p-0">
+                  <Command>
+                    <CommandInput placeholder="Search language..." />
+                    <CommandEmpty>No language found.</CommandEmpty>
+                    <CommandGroup>
+                      {languages.map((language) => (
+                        <CommandItem
+                          key={language.value}
+                          onSelect={() => {
+                            form.setValue('language', language.value);
+                          }}
+                        >
+                          <CheckIcon
+                            className={cn(
+                              'mr-2 h-4 w-4',
+                              language.value === field.value
+                                ? 'opacity-100'
+                                : 'opacity-0'
+                            )}
+                          />
+                          {language.label}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+              <FormDescription>
+                This is the language that will be used in the dashboard.
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -125,21 +290,10 @@ function ProfileForm() {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Email</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a verified email to display" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="m@example.com">m@example.com</SelectItem>
-                  <SelectItem value="m@google.com">m@google.com</SelectItem>
-                  <SelectItem value="m@support.com">m@support.com</SelectItem>
-                </SelectContent>
-              </Select>
+              <p>{auth.currentUser?.email ?? ''}</p>
               <FormDescription>
-                You can manage verified email addresses in your{' '}
-                <Link to="/examples/forms">email settings</Link>.
+                Your verified email address is used for sign in and email
+                notifications.
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -199,7 +353,9 @@ function ProfileForm() {
           </Button>
         </div>
         <div className="flex items-center justify-between gap-2">
-          <Button type="submit">Update profile</Button>
+          <Button type="submit" disabled={loading}>
+            {loading ? 'Updating...' : 'Update profile'}
+          </Button>
           <Button variant="outline" onClick={handleSignOut}>
             Sign Out
           </Button>

@@ -1,26 +1,43 @@
-import {  NavigateFunction } from "react-router-dom";
-import { auth, signInWithPopup, facebookProvider, googleProvider, db } from "../firebaseConfig";
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, User } from "firebase/auth";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  sendPasswordResetEmail as firebaseSendPasswordResetEmail,
+} from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
+import type { NavigateFunction } from 'react-router-dom';
 
+import {
+  auth,
+  signInWithPopup,
+  facebookProvider,
+  googleProvider,
+  db,
+} from '../firebaseConfig';
 
-// Email Sign in 
+// Email Sign in
 
 export const signUpEmail = async (email: string, password: string) => {
-
-    try {
-        const userCrudential = await createUserWithEmailAndPassword(auth, email, password);
-        return userCrudential.user
-    } catch (error) {
-        throw (error)
-    }
-
+  try {
+    const userCredential = await createUserWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
+    return userCredential.user;
+  } catch (error) {
+    throw error;
+  }
 };
-
 
 export const logInEmail = async (email: string, password: string) => {
   try {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const userCredential = await signInWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
     return userCredential.user;
   } catch (error) {
     throw error;
@@ -35,16 +52,23 @@ export const logOut = async () => {
   }
 };
 
+export const sendPasswordResetEmail = async (email: string) => {
+  try {
+    await firebaseSendPasswordResetEmail(auth, email);
+  } catch (error: any) {
+    throw new Error(error.message);
+  }
+};
+
 // Facebook Sign In
 
 export const signInWithFacebook = async (navigate: NavigateFunction) => {
   try {
     const result = await signInWithPopup(auth, facebookProvider);
-    const user = result.user;
-    createFireStoneProfile(user, navigate);
+    const { user } = result;
+    createFirestoreProfile(user, navigate);
 
     // Handle user profile creation or redirection here
-
   } catch (error) {
     console.error('Error signing in with Facebook: ', error);
     throw error;
@@ -54,17 +78,17 @@ export const signInWithFacebook = async (navigate: NavigateFunction) => {
 // Google Sign In
 
 export const signInWithGoogle = async (navigate: NavigateFunction) => {
-    try {
-      const result = await signInWithPopup(auth, googleProvider);
-      const user = result.user;
+  try {
+    const result = await signInWithPopup(auth, googleProvider);
+    const { user } = result;
 
-      createFireStoneProfile(user, navigate);
-    }  catch (error) {
-      console.error('Error signing in with Google: ', error);
-    }
-  };
+    createFirestoreProfile(user, navigate);
+  } catch (error) {
+    console.error('Error signing in with Google: ', error);
+  }
+};
 
-  async function createFireStoneProfile(user: User, navigate: NavigateFunction) {
+async function createFirestoreProfile(user: User, navigate: NavigateFunction) {
   try {
     const userDocRef = doc(db, 'users', user.uid);
     const userDoc = await getDoc(userDocRef);
