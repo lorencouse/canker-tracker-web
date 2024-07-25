@@ -7,7 +7,7 @@ import SoreSliders from '@/components/SoreComponents/SoreSliders';
 import { UIProvider } from '@/Context/UiContext';
 
 const Home = () => {
-  const [mode, setMode] = useState<'add' | 'edit' | 'view'>('view');
+  const [mode, setMode] = useState<'add' | 'edit' | 'update' | 'view'>('view');
 
   return (
     <UIProvider>

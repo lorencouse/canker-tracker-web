@@ -2,7 +2,6 @@ import { useState } from 'react';
 
 import { Separator } from '../ui/separator';
 
-import SettingsAccountPage from './account/page';
 import SettingsAppearancePage from './appearance/page';
 import SidebarNav from './components/sidebar-nav';
 import SettingsDisplayPage from './display/page';

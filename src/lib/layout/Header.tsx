@@ -28,7 +28,7 @@ export default function Header() {
   return (
     <header className="flex h-20 w-full items-center justify-between px-4 md:px-6">
       <div className="flex items-center">
-        <Link to="/" className="flex h-14 w-14" prefetch={false}>
+        <Link to="/" className="flex h-14 w-14" prefetch="false">
           <img src="/assets/images/logo-100.png" alt="Canker Tracker" />
           <span className="sr-only">Canker Tracker</span>
         </Link>
@@ -36,13 +36,13 @@ export default function Header() {
         <NavigationMenu className="ml-6 hidden lg:flex">
           <NavigationMenuList className="ml-4 flex gap-8">
             <NavigationMenuLink asChild>
-              <Link to="/" className="nav-link" prefetch={false}>
+              <Link to="/" className="nav-link" prefetch="false">
                 Home
               </Link>
             </NavigationMenuLink>
             {isSignedIn && (
               <NavigationMenuLink asChild>
-                <Link to="/settings" className="nav-link" prefetch={false}>
+                <Link to="/settings" className="nav-link" prefetch="false">
                   Settings
                 </Link>
               </NavigationMenuLink>
@@ -54,7 +54,7 @@ export default function Header() {
       <div className="hidden items-center lg:flex">
         <ThemeToggle className="mr-4" />
         {isSignedIn ? (
-          <Link to="/settings" prefetch={false}>
+          <Link to="/settings" prefetch="false">
             <Avatar>
               <AvatarImage src={profilePic} />
               <AvatarFallback>CT</AvatarFallback>
@@ -62,7 +62,7 @@ export default function Header() {
           </Link>
         ) : (
           <Button variant="outline">
-            <Link to="/sign-in" prefetch={false}>
+            <Link to="/sign-in" prefetch="false">
               Login
             </Link>
           </Button>
@@ -79,7 +79,7 @@ export default function Header() {
         <SheetContent side="left">
           <div className="flex h-full flex-col justify-between">
             <div className="p-4">
-              <Link to="/" prefetch={false}>
+              <Link to="/" prefetch="false">
                 <img
                   src="/assets/images/logo-100.png"
                   alt="Canker Tracker"
@@ -91,7 +91,7 @@ export default function Header() {
                 <Link
                   to="/"
                   className="flex w-full items-center py-2 text-lg font-semibold"
-                  prefetch={false}
+                  prefetch="false"
                 >
                   Home
                 </Link>
@@ -99,7 +99,7 @@ export default function Header() {
                   <Link
                     to="/settings"
                     className="flex w-full items-center py-2 text-lg font-semibold"
-                    prefetch={false}
+                    prefetch="false"
                   >
                     Settings
                   </Link>
@@ -109,7 +109,7 @@ export default function Header() {
             <div className="flex justify-between p-4">
               <ThemeToggle />
               {isSignedIn ? (
-                <Link to="/profile" prefetch={false}>
+                <Link to="/profile" prefetch="false">
                   <Avatar>
                     <AvatarImage src={profilePic} />
                     <AvatarFallback>CT</AvatarFallback>
@@ -117,7 +117,7 @@ export default function Header() {
                 </Link>
               ) : (
                 <Button variant="outline">
-                  <Link to="/sign-in" prefetch={false}>
+                  <Link to="/sign-in" prefetch="false">
                     Login
                   </Link>
                 </Button>

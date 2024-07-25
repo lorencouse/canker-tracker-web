@@ -164,3 +164,12 @@ export const loadLogTime = async () => {
     throw e;
   }
 };
+
+export const checkDailyLogStatus = async () => {
+  const logTime = await loadLogTime();
+  const now = new Date();
+  if (logTime && logTime.getDate() === now.getDate()) {
+    return true;
+  }
+  return false;
+};

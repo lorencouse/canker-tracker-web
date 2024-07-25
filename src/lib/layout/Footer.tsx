@@ -10,7 +10,7 @@ export default function Footer() {
           <Link
             to="#"
             className="text-white hover:text-gray-300"
-            prefetch={false}
+            prefetch="false"
           >
             <YoutubeIcon className="h-6 w-6" />
             <span className="sr-only">YouTube</span>
@@ -18,7 +18,7 @@ export default function Footer() {
           <Link
             to="#"
             className="text-white hover:text-gray-300"
-            prefetch={false}
+            prefetch="false"
           >
             <GithubIcon className="h-6 w-6" />
             <span className="sr-only">GitHub</span>
@@ -26,7 +26,7 @@ export default function Footer() {
           <Link
             to="#"
             className="text-white hover:text-gray-300"
-            prefetch={false}
+            prefetch="false"
           >
             <TwitterIcon className="h-6 w-6" />
             <span className="sr-only">Twitter</span>

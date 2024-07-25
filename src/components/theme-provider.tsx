@@ -3,11 +3,13 @@ import React from 'react';
 
 interface IThemeContext {
   theme: string;
+  setTheme: (theme: string) => void;
   toggleTheme: () => void;
 }
 
 export const ThemeContext = React.createContext<IThemeContext>({
   theme: 'light',
+  setTheme: (theme: string) => console.error('no theme provider'),
   toggleTheme: () => console.error('no theme provider'),
 } as IThemeContext);
 
@@ -40,8 +42,8 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
   }, [theme]);
 
   const providerValue = React.useMemo(
-    () => ({ theme, toggleTheme }),
-    [theme, toggleTheme]
+    () => ({ theme, toggleTheme, setTheme }),
+    [theme, toggleTheme, setTheme]
   );
 
   return (

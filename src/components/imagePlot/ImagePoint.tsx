@@ -13,7 +13,11 @@ import {
 } from '../../utilities/StageUtils';
 import SoreCircle from '../SoreComponents/SoreCircle';
 import { useUIContext } from '@/Context/UiContext';
-import { deleteSore, loadSores, saveSores } from '@/services/firestoreService';
+import {
+  deleteSore,
+  saveSores,
+  checkDailyLogStatus,
+} from '@/services/firestoreService';
 import type { CankerSore } from '@/types';
 import { calcView } from '@/utilities/ClickHandlers';
 
@@ -25,7 +29,9 @@ const ImagePoint: React.FC = ({
   setMode,
 }: {
   mode: 'add' | 'edit' | 'view';
-  setMode: React.Dispatch<React.SetStateAction<'add' | 'edit' | 'view'>>;
+  setMode: React.Dispatch<
+    React.SetStateAction<'add' | 'edit' | 'update' | 'view'>
+  >;
 }) => {
   const { sores, setSores, selectedSore, setSelectedSore } = useUIContext();
   const [isGums, setIsGums] = useState<boolean>(false);
@@ -34,14 +40,28 @@ const ImagePoint: React.FC = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const { width: stageWidth, height: stageHeight } = useStageSize(containerRef);
   const [originalSores, setOriginalSores] = useState<CankerSore[]>([]);
+  const [isLogCompleted, setIsLogCompleted] = useState(true);
 
   useEffect(() => {
-    const fetchSores = async () => {
-      const activeSores = await loadSores('activesores');
-      setSores(activeSores);
+    const checkStatus = async () => {
+      const result = await checkDailyLogStatus();
+      setIsLogCompleted(result);
+
+      if (!result) {
+        setSelectedSore(sores[0]);
+        setMode('update');
+      }
+
+      // if (currentSore.id === sores[sores.length - 1].id) {
+      //   setMode('add');
+      // }
     };
 
-    fetchSores();
+    setTimeout(() => {
+      checkStatus();
+    }, 2000);
+
+    checkStatus();
   }, []);
 
   useEffect(() => {
@@ -78,7 +98,7 @@ const ImagePoint: React.FC = ({
   const handleDragLabelCoordination = (
     e: React.MouseEvent<HTMLGroupElement>
   ) => {
-    if (mode === 'add' || mode === 'edit') {
+    if (mode === 'add' || mode === 'edit' || mode === 'update') {
       const { x, y } = calculateCoordination(e);
       const id = e.target.id() || e.target.findAncestor('Group')?.attrs.id;
       const updatedSores = sores.map((sore) =>
@@ -104,8 +124,8 @@ const ImagePoint: React.FC = ({
         updated: [new Date()],
         zone: calcView(x, y),
         gums: isGums,
-        size: [3],
-        pain: [3],
+        size: [5],
+        pain: [5],
         x,
         y,
       };
@@ -159,12 +179,49 @@ const ImagePoint: React.FC = ({
     );
   };
 
+  const handleUpdateSore = () => {
+    if (!selectedSore) return;
+
+    const soreIndex = sores.findIndex((s) => s.id === selectedSore.id);
+    if (soreIndex === -1) return;
+
+    const oldSore = sores[soreIndex];
+
+    const newSore = {
+      ...oldSore,
+      size: [...oldSore.size, selectedSore.size],
+      pain: [...oldSore.pain, selectedSore.pain],
+      updated: [...oldSore.updated, new Date()],
+    };
+
+    const updatedSores = [...sores];
+    updatedSores[soreIndex] = newSore;
+
+    setSores(updatedSores);
+
+    if (soreIndex < sores.length - 1) {
+      setSelectedSore(sores[soreIndex + 1]);
+    } else {
+      saveSores('activesores', updatedSores);
+      setSelectedSore(null);
+      setMode('add');
+    }
+
+    // Optionally save to localStorage if needed
+    localStorage.setItem('activesores', JSON.stringify(updatedSores));
+  };
+
   return (
     <div
       ref={containerRef}
       className="border-1 border-grey relative h-full w-full rounded-2xl"
       style={{ height: '0', paddingBottom: '100%', position: 'relative' }}
     >
+      {isLogCompleted ? (
+        <p>Log completed</p>
+      ) : (
+        <p className="text-red-500">Log not completed</p>
+      )}
       <Stage
         style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
         width={stageWidth}
@@ -248,12 +305,16 @@ const ImagePoint: React.FC = ({
             )}
           </>
         )}
-        {mode !== 'view' && (
-          <>
-            <ImagePlotButton onClick={handleCancel} label="Cancel" />
+        {mode === 'edit' ||
+          (mode === 'add' && (
+            <>
+              <ImagePlotButton onClick={handleCancel} label="Cancel" />
 
-            <ImagePlotButton onClick={handleFinishAdd} label="Finish" />
-          </>
+              <ImagePlotButton onClick={handleFinishAdd} label="Finish" />
+            </>
+          ))}
+        {mode === 'update' && (
+          <ImagePlotButton onClick={handleUpdateSore} label="Next" />
         )}
       </div>
     </div>

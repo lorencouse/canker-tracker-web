@@ -26,6 +26,14 @@ import {
 } from '@/components/ui/select';
 import { useUIContext } from '@/Context/UiContext';
 
+const XAxisWithDefaults = ({ dataKey = 'date', ...restProps }) => {
+  return <XAxis dataKey={dataKey} {...restProps} />;
+};
+
+const YAxisWithDefaults = ({ domain = [0, 10], ...restProps }) => {
+  return <YAxis domain={domain} {...restProps} />;
+};
+
 export default function ChartHistory() {
   const { sores } = useUIContext();
   const [timeRange, setTimeRange] = React.useState('90d');
@@ -135,8 +143,7 @@ export default function ChartHistory() {
                   ))}
                 </defs>
                 <CartesianGrid vertical={false} />
-                <XAxis
-                  dataKey="date"
+                <XAxisWithDefaults
                   tickLine={false}
                   axisLine={false}
                   tickMargin={8}
@@ -149,7 +156,7 @@ export default function ChartHistory() {
                     });
                   }}
                 />
-                <YAxis domain={[0, 10]} />
+                <YAxisWithDefaults />
                 <ChartTooltip
                   cursor={false}
                   content={
