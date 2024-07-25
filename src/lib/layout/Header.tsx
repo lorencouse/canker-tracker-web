@@ -40,6 +40,12 @@ export default function Header() {
                 Home
               </Link>
             </NavigationMenuLink>
+            <NavigationMenuLink asChild>
+              <Link to="/daily-log" className="nav-link" prefetch="false">
+                Log
+              </Link>
+            </NavigationMenuLink>
+
             {isSignedIn && (
               <NavigationMenuLink asChild>
                 <Link to="/settings" className="nav-link" prefetch="false">

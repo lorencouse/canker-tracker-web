@@ -3,13 +3,12 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 
-import { Button } from '../../components/Button';
-import {
-  InputCheckboxField,
-  InputNumberField,
-} from '../../components/InputBox';
-import { saveLogTime, saveData } from '../../services/firestoreService';
-import type { DailyLog } from '../types';
+import NumberSelector from '@/components/dailyLog/numberSelector';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Textarea } from '@/components/ui/textarea';
+import { saveLogTime, saveData } from '@/services/firestoreService';
+import type { DailyLog } from '@/types';
 
 const DailyLogView: React.FC = () => {
   const today = new Date();
@@ -30,15 +29,17 @@ const DailyLogView: React.FC = () => {
   const navigate = useNavigate();
 
   const inputChangeHandler = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
   ) => {
-    const target = e.target as HTMLInputElement | HTMLSelectElement;
-    const value =
-      target.type === 'checkbox'
-        ? (target as HTMLInputElement).checked
-        : target.value;
-    const { name } = target;
-    setDailyLog((prev) => ({ ...prev, [name]: value }));
+    const { name, type, value, checked } = e.target as
+      | HTMLInputElement
+      | HTMLSelectElement;
+    setDailyLog((prev) => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : Number(value),
+    }));
   };
 
   const handleFinishButtonClick = async () => {
@@ -54,100 +55,88 @@ const DailyLogView: React.FC = () => {
   };
 
   return (
-    <div className="daily-log-container m-auto max-w-lg">
-      <div className="input-form flex flex-col">
-        <h1> Daily Log</h1>
+    <div className="container mx-auto max-w-lg p-4">
+      <div className="flex flex-col">
+        <h1 className="mb-4 text-2xl font-bold">Daily Log</h1>
 
         <form>
-          <div className="my-2 rounded-lg border-2 border-solid border-gray-500 p-5">
-            <h2>Diet</h2>
-            <h3>In the last 24 hours ...</h3>
-            <InputCheckboxField
+          <div className="mb-5 rounded-lg border border-gray-300 p-4">
+            <h2 className="mb-2 text-lg font-semibold">Diet</h2>
+            <h3 className="mb-4 text-sm">In the last 24 hours ...</h3>
+            <Checkbox
               label="Have you had sugar? (candy, cakes, or sweetened drinks)"
-              forLabel="sugarUse"
-              value={dailyLog.sugarUse}
+              name="sugarUse"
+              checked={dailyLog.sugarUse}
               onChange={inputChangeHandler}
             />
-
-            <InputCheckboxField
+            <Checkbox
               label="Have you eaten spicy food?"
-              forLabel="spicyFood"
-              value={dailyLog.spicyFood}
+              name="spicyFood"
+              checked={dailyLog.spicyFood}
               onChange={inputChangeHandler}
             />
-
-            <InputNumberField
-              label="Have you had caffeinated drinks?"
-              forLabel="caffeineUse"
-              options={[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
-              value={dailyLog.caffeineUse}
-              onChange={inputChangeHandler}
+            <NumberSelector
+              title="Have you had caffeinated drinks?"
+              arrayLength={10}
+              name="caffeineUse"
+              logValue={dailyLog.caffeineUse}
+              inputChangeHandler={inputChangeHandler}
             />
-
-            <InputNumberField
-              label="Have you had carbonated drinks?"
-              forLabel="carbonatedDrinks"
-              options={[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
-              value={dailyLog.carbonatedDrinks}
-              onChange={inputChangeHandler}
+            <NumberSelector
+              title="Have you had any carbonated drinks?"
+              arrayLength={10}
+              name="carbonatedDrinks"
+              logValue={dailyLog.carbonatedDrinks}
+              inputChangeHandler={inputChangeHandler}
             />
-
-            <InputNumberField
-              label="Have you had alcoholic drinks?"
-              forLabel="alcoholicDrinks"
-              options={[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
-              value={dailyLog?.alcoholicDrinks}
-              onChange={inputChangeHandler}
+            <NumberSelector
+              title="Have you had alcoholic drinks?"
+              arrayLength={10}
+              name="alcoholicDrinks"
+              logValue={dailyLog.alcoholicDrinks}
+              inputChangeHandler={inputChangeHandler}
             />
           </div>
 
-          {/* Add other inputs as needed */}
-          <div className="my-5 rounded-lg rounded-sm border-2 border-solid border-gray-500 p-5">
-            <h2> Health</h2>
-            <InputCheckboxField
+          <div className="mb-5 rounded-lg border border-gray-300 p-4">
+            <h2 className="mb-2 text-lg font-semibold">Health</h2>
+            <Checkbox
               label="Are you currently sick?"
-              forLabel="currentlySick"
-              value={dailyLog.currentlySick}
+              name="currentlySick"
+              checked={dailyLog.currentlySick}
               onChange={inputChangeHandler}
             />
-
-            <InputNumberField
-              label="How many hours of sleep did you get last night?"
-              forLabel="hoursOfSleep"
-              options={[
-                0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
-                18, 19, 20, 21, 22, 23,
-              ]}
-              value={dailyLog?.hoursOfSleep}
-              onChange={inputChangeHandler}
+            <NumberSelector
+              title="How many hours of sleep did you get?"
+              arrayLength={25}
+              name="hoursOfSleep"
+              logValue={dailyLog.hoursOfSleep}
+              inputChangeHandler={inputChangeHandler}
             />
-
-            <InputNumberField
-              label="What is your stress level: 1 (Low) - 10 (High)?"
-              forLabel="streeLevel"
-              options={[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
-              value={dailyLog?.stressLevel}
-              onChange={inputChangeHandler}
+            <NumberSelector
+              title="What is your stress level: 0 (Low) - 10 (High)?"
+              arrayLength={11}
+              name="stressLevel"
+              logValue={dailyLog.stressLevel}
+              inputChangeHandler={inputChangeHandler}
             />
-
             <label
               htmlFor="notes"
-              className="mb-1 block pr-4 text-left font-bold text-gray-500 md:mb-0"
+              className="block text-sm font-medium text-gray-700"
             >
               Notes:
             </label>
-            <input
-              type="text"
+            <Textarea
               name="notes"
-              value={dailyLog?.notes}
+              value={dailyLog.notes}
               onChange={inputChangeHandler}
-              className="h-60 w-full"
+              className="mt-1 block w-full"
             />
           </div>
         </form>
-        <div className="flex flex-row justify-end">
-          <Button label="Back" action={() => navigate('/')} />
-          <Button label="Finish" action={handleFinishButtonClick} />
+        <div className="flex justify-end space-x-4">
+          <Button onClick={() => navigate('/')}>Back</Button>
+          <Button onClick={handleFinishButtonClick}>Finish</Button>
         </div>
       </div>
     </div>
