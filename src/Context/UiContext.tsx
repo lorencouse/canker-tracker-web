@@ -22,14 +22,22 @@ export const UIProvider: React.FC<UIProviderProps> = ({ children }) => {
   const [sores, setSores] = useState<CankerSore[]>([]);
   const [selectedSore, setSelectedSore] = useState<CankerSore | null>(null);
 
-  useEffect(() => {
-    const fetchSores = async () => {
-      const activeSores = await loadSores('activesores');
-      setSores(activeSores);
-    };
+  // useEffect(() => {
+  //   const fetchSores = async () => {
+  //     // Check local storage first
+  //     const cachedSores = localStorage.getItem('activesores');
+  //     if (cachedSores) {
+  //       setSores(JSON.parse(cachedSores));
+  //     }
 
-    fetchSores();
-  }, []);
+  //     // Fetch the latest sores data from the server
+  //     const activeSores = await loadSores('activesores');
+  //     setSores(activeSores);
+  //     localStorage.setItem('activesores', JSON.stringify(activeSores));
+  //   };
+
+  //   fetchSores();
+  // }, []);
 
   const contextValue = useMemo(
     () => ({
@@ -38,7 +46,7 @@ export const UIProvider: React.FC<UIProviderProps> = ({ children }) => {
       selectedSore,
       setSelectedSore,
     }),
-    [sores, setSores, selectedSore, setSelectedSore]
+    [sores, selectedSore]
   );
 
   return (

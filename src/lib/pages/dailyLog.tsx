@@ -4,8 +4,10 @@ import { useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 
 import NumberSelector from '@/components/dailyLog/numberSelector';
+import ToggleYesNo from '@/components/dailyLog/toggleYesNo';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { saveLogTime, saveData } from '@/services/firestoreService';
 import type { DailyLog } from '@/types';
@@ -15,7 +17,6 @@ const DailyLogView: React.FC = () => {
   const [dailyLog, setDailyLog] = useState<DailyLog>({
     id: uuidv4(),
     date: today,
-    activeSoreIDs: [],
     currentlySick: false,
     sugarUse: false,
     spicyFood: false,
@@ -42,11 +43,18 @@ const DailyLogView: React.FC = () => {
     }));
   };
 
+  const handleSwitchChange = (name: string, checked: boolean) => {
+    setDailyLog((prev) => ({
+      ...prev,
+      [name]: checked,
+    }));
+  };
+
   const handleFinishButtonClick = async () => {
     if (dailyLog) {
       try {
         await saveData('dailyLogs', dailyLog.id, dailyLog);
-        await saveLogTime(today);
+        // await saveLogTime(today);
         navigate('/');
       } catch (e) {
         alert(`Could not save log. Error: ${e}`);
@@ -63,17 +71,21 @@ const DailyLogView: React.FC = () => {
           <div className="mb-5 rounded-lg border border-gray-300 p-4">
             <h2 className="mb-2 text-lg font-semibold">Diet</h2>
             <h3 className="mb-4 text-sm">In the last 24 hours ...</h3>
-            <Checkbox
-              label="Have you had sugar? (candy, cakes, or sweetened drinks)"
-              name="sugarUse"
+            <ToggleYesNo
+              label="Have you eaten sugar or sweets?"
+              id="sugarUse"
               checked={dailyLog.sugarUse}
-              onChange={inputChangeHandler}
+              onCheckedChange={(checked) =>
+                handleSwitchChange('sugarUse', checked)
+              }
             />
-            <Checkbox
-              label="Have you eaten spicy food?"
-              name="spicyFood"
+            <ToggleYesNo
+              label='Have you eaten "spicy food"?'
+              id="spicyFood"
               checked={dailyLog.spicyFood}
-              onChange={inputChangeHandler}
+              onCheckedChange={(checked) =>
+                handleSwitchChange('spicyFood', checked)
+              }
             />
             <NumberSelector
               title="Have you had caffeinated drinks?"
@@ -100,12 +112,15 @@ const DailyLogView: React.FC = () => {
 
           <div className="mb-5 rounded-lg border border-gray-300 p-4">
             <h2 className="mb-2 text-lg font-semibold">Health</h2>
-            <Checkbox
+            <ToggleYesNo
               label="Are you currently sick?"
-              name="currentlySick"
+              id="currentlySick"
               checked={dailyLog.currentlySick}
-              onChange={inputChangeHandler}
+              onCheckedChange={(checked) =>
+                handleSwitchChange('currentlySick', checked)
+              }
             />
+
             <NumberSelector
               title="How many hours of sleep did you get?"
               arrayLength={25}
@@ -134,8 +149,8 @@ const DailyLogView: React.FC = () => {
             />
           </div>
         </form>
-        <div className="flex justify-end space-x-4">
-          <Button onClick={() => navigate('/')}>Back</Button>
+        <div className="flex justify-end gap-x-4">
+          {/* <Button onClick={() => navigate('/')}>Back</Button> */}
           <Button onClick={handleFinishButtonClick}>Finish</Button>
         </div>
       </div>

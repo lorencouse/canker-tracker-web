@@ -138,37 +138,44 @@ export const clearAllSores = async (collectionPath: string) => {
 
 const LOG_REF = doc(db, 'settings', 'logTime'); // Define a single reference path
 
-export const saveLogTime = async (date: Date) => {
-  try {
-    await setDoc(LOG_REF, { time: date });
-    console.log('Log time successfully saved!');
-  } catch (error) {
-    console.error(
-      'Error saving log time: ',
-      error instanceof FirestoreError ? error.message : error
-    );
-  }
-};
+// export const saveLogTime = async (date: Date) => {
+//   try {
+//     await setDoc(LOG_REF, { time: date });
+//     console.log('Log time successfully saved!');
+//   } catch (error) {
+//     console.error(
+//       'Error saving log time: ',
+//       error instanceof FirestoreError ? error.message : error
+//     );
+//   }
+// };
 
-export const loadLogTime = async () => {
-  try {
-    const docSnap = await getDoc(LOG_REF);
-    if (docSnap.exists()) {
-      console.log('Document data:', docSnap.data());
-      return new Date(docSnap.data().time); // Assuming the stored data has a 'time' property
-    }
-    console.log('No such document!');
-    return null; // Return null if the document doesn't exist
-  } catch (e) {
-    console.error('Error loading log time: ', e);
-    throw e;
-  }
-};
+// export const loadLogTime = async ( dates: Date[] ) => {
+//   try {
+//     const docSnap = await getDoc(LOG_REF);
+//     if (docSnap.exists()) {
+//       console.log('Document data:', docSnap.data());
+//       return new Date(docSnap.data().time); // Assuming the stored data has a 'time' property
+//     }
+//     console.log('No such document!');
+//     return null; // Return null if the document doesn't exist
+//   } catch (e) {
+//     console.error('Error loading log time: ', e);
+//     throw e;
+//   }
+// };
 
-export const checkDailyLogStatus = async () => {
-  const logTime = await loadLogTime();
+export const checkDailyLogStatus = async (updated: Date[]) => {
+  const lastLog = updated[updated.length - 1];
+  const logTime = new Date(lastLog);
   const now = new Date();
-  if (logTime && logTime.getDate() === now.getDate()) {
+  console.log(now, logTime);
+  if (
+    logTime &&
+    logTime.getFullYear() === now.getFullYear() &&
+    logTime.getMonth() === now.getMonth() &&
+    logTime.getDate() === now.getDate()
+  ) {
     return true;
   }
   return false;

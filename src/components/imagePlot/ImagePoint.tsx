@@ -1,6 +1,7 @@
 import type React from 'react';
 import { useState, useEffect, useRef } from 'react';
 import { Stage, Layer, Group } from 'react-konva';
+import { useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 
 import { useStageSize } from '../../hooks/useStageSize';
@@ -17,6 +18,7 @@ import {
   deleteSore,
   saveSores,
   checkDailyLogStatus,
+  loadSores,
 } from '@/services/firestoreService';
 import type { CankerSore } from '@/types';
 import { calcView } from '@/utilities/ClickHandlers';
@@ -34,35 +36,56 @@ const ImagePoint: React.FC = ({
   >;
 }) => {
   const { sores, setSores, selectedSore, setSelectedSore } = useUIContext();
-  const [isGums, setIsGums] = useState<boolean>(false);
-  const [image, setImage] = useState<string>('/assets/images/cat.jpeg');
+  const [isGums, setIsGums] = useState(false);
+  const [image, setImage] = useState('/assets/images/cat.jpeg');
   const stageRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const { width: stageWidth, height: stageHeight } = useStageSize(containerRef);
-  const [originalSores, setOriginalSores] = useState<CankerSore[]>([]);
-  const [isLogCompleted, setIsLogCompleted] = useState(true);
+  const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD format
+  const [logCompleted, setLogCompleted] = useState(true);
+  const navigate = useNavigate();
+  const originalSores = useRef(sores); // Store original sores for cancellation
 
+  // Combined useEffect for Initialization and Log Status
   useEffect(() => {
-    const checkStatus = async () => {
-      const result = await checkDailyLogStatus();
-      setIsLogCompleted(result);
+    const fetchAndCheck = async () => {
+      const cachedSores = JSON.parse(
+        localStorage.getItem('activesores') || '[]'
+      );
+      setSores(cachedSores); // Set sores from cache
+      setSelectedSore(cachedSores[0]);
 
-      if (!result) {
-        setSelectedSore(sores[0]);
-        setMode('update');
+      const activeSores = await loadSores('activesores');
+      setSores(activeSores);
+      localStorage.setItem('activesores', JSON.stringify(activeSores));
+
+      if (activeSores[0]) {
+        const result = checkDailyLogStatus(activeSores[0].updated);
+        console.log(result);
+        setLogCompleted(result);
+
+        if (!result && activeSores.length) {
+          setMode('update');
+          const updatedSores = activeSores.map((sore) => ({
+            ...sore,
+            ...(sore.updated.includes(today)
+              ? {}
+              : {
+                  size: [...sore.size, sore.size.at(-1) ?? 5],
+                  pain: [...sore.pain, sore.pain.at(-1) ?? 5],
+                  updated: [...sore.updated, today],
+                }),
+          }));
+          setSores(updatedSores);
+          localStorage.setItem('activesores', JSON.stringify(updatedSores));
+          setSelectedSore(updatedSores[0]);
+        }
       }
-
-      // if (currentSore.id === sores[sores.length - 1].id) {
-      //   setMode('add');
-      // }
     };
+    fetchAndCheck();
 
-    setTimeout(() => {
-      checkStatus();
-    }, 2000);
-
-    checkStatus();
-  }, []);
+    // ... (resize and touchmove handlers remain the same)
+  }, [setSores, setSelectedSore, setMode, today]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -121,7 +144,7 @@ const ImagePoint: React.FC = ({
     if (mode === 'add') {
       const newSore: CankerSore = {
         id: uuidv4(),
-        updated: [new Date()],
+        updated: [today],
         zone: calcView(x, y),
         gums: isGums,
         size: [5],
@@ -158,9 +181,13 @@ const ImagePoint: React.FC = ({
 
   const handleFinishAdd = async () => {
     localStorage.setItem('activesores', JSON.stringify(sores));
-    setMode('view');
     saveSores(sores);
     setSelectedSore(null);
+    if (logCompleted) {
+      setMode('view');
+    } else {
+      navigate('/daily-log');
+    }
   };
 
   const handleDeleteButton = () => {
@@ -179,35 +206,42 @@ const ImagePoint: React.FC = ({
     );
   };
 
+  const updateSore = (updatedSore: CankerSore) => {
+    setSores((prevSores) =>
+      prevSores.map((s) => (s.id === updatedSore.id ? updatedSore : s))
+    );
+  };
+
   const handleUpdateSore = () => {
     if (!selectedSore) return;
 
     const soreIndex = sores.findIndex((s) => s.id === selectedSore.id);
     if (soreIndex === -1) return;
 
-    const oldSore = sores[soreIndex];
-
-    const newSore = {
-      ...oldSore,
-      size: [...oldSore.size, selectedSore.size],
-      pain: [...oldSore.pain, selectedSore.pain],
-      updated: [...oldSore.updated, new Date()],
-    };
-
-    const updatedSores = [...sores];
-    updatedSores[soreIndex] = newSore;
+    const updatedSores = sores.map((sore) => {
+      if (sore.id === selectedSore.id) {
+        const updatedSore = { ...sore };
+        const todayIndex = updatedSore.updated.indexOf(today);
+        if (todayIndex === -1) {
+          updatedSore.size = [...sore.size, 5]; // Adjust size value as needed
+          updatedSore.pain = [...sore.pain, 5]; // Adjust pain value as needed
+          updatedSore.updated = [...sore.updated, today];
+        }
+        return updatedSore;
+      }
+      return sore;
+    });
 
     setSores(updatedSores);
 
     if (soreIndex < sores.length - 1) {
-      setSelectedSore(sores[soreIndex + 1]);
+      setSelectedSore(updatedSores[soreIndex + 1]);
     } else {
       saveSores('activesores', updatedSores);
       setSelectedSore(null);
       setMode('add');
     }
 
-    // Optionally save to localStorage if needed
     localStorage.setItem('activesores', JSON.stringify(updatedSores));
   };
 
@@ -217,7 +251,7 @@ const ImagePoint: React.FC = ({
       className="border-1 border-grey relative h-full w-full rounded-2xl"
       style={{ height: '0', paddingBottom: '100%', position: 'relative' }}
     >
-      {isLogCompleted ? (
+      {logCompleted ? (
         <p>Log completed</p>
       ) : (
         <p className="text-red-500">Log not completed</p>
@@ -229,7 +263,6 @@ const ImagePoint: React.FC = ({
         draggable
         onWheel={(e) => {
           if (window.innerWidth > 768) {
-            // Disable on small screens
             handleZoomStage(stageRef)(e);
           }
         }}
@@ -267,7 +300,7 @@ const ImagePoint: React.FC = ({
         <ImagePlotButton onClick={() => handleZoom(stageRef, 0.75)} label="-" />
       </div>
       <div className="absolute bottom-0 left-0 z-10 flex w-full flex-row justify-between">
-        {selectedSore && (
+        {selectedSore && mode !== 'update' && (
           <ImagePlotButton onClick={handleDeleteButton} label="Delete" />
         )}
       </div>
@@ -305,14 +338,12 @@ const ImagePoint: React.FC = ({
             )}
           </>
         )}
-        {mode === 'edit' ||
-          (mode === 'add' && (
-            <>
-              <ImagePlotButton onClick={handleCancel} label="Cancel" />
-
-              <ImagePlotButton onClick={handleFinishAdd} label="Finish" />
-            </>
-          ))}
+        {(mode === 'edit' || mode === 'add') && (
+          <>
+            <ImagePlotButton onClick={handleCancel} label="Cancel" />
+            <ImagePlotButton onClick={handleFinishAdd} label="Finish" />
+          </>
+        )}
         {mode === 'update' && (
           <ImagePlotButton onClick={handleUpdateSore} label="Next" />
         )}

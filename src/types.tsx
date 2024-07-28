@@ -12,7 +12,7 @@ export interface CankerSore {
 export interface DailyLog {
   id: string;
   date: Date;
-  activeSoreIDs: string[];
+  // activeSoreIDs: string[];
   currentlySick: boolean;
   sugarUse: boolean;
   spicyFood: boolean;
