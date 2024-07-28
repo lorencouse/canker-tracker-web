@@ -14,6 +14,8 @@ import {
 } from '../../utilities/StageUtils';
 import SoreCircle from '../SoreComponents/SoreCircle';
 import { useUIContext } from '@/Context/UiContext';
+import { useFetchAndCheck } from '@/hooks/useFetchAndCheckSores';
+import { useStageHandlers } from '@/hooks/useStateHandlers';
 import {
   deleteSore,
   saveSores,
@@ -21,7 +23,7 @@ import {
   loadSores,
 } from '@/services/firestoreService';
 import type { CankerSore } from '@/types';
-import { calcView } from '@/utilities/ClickHandlers';
+import calcView from '@/utilities/ClickHandlers';
 
 import ImagePlotButton from './ImagePlotButton';
 import Images from './Images';
@@ -44,79 +46,81 @@ const ImagePoint: React.FC = ({
   const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD format
   const [logCompleted, setLogCompleted] = useState(true);
   const navigate = useNavigate();
-  const originalSores = useRef(sores); // Store original sores for cancellation
+  const originalSores = useRef<CankerSore[]>([]); // Store original sores for cancellation
+
+  useFetchAndCheck(setSores, setSelectedSore, setLogCompleted, setMode, today);
+  useStageHandlers(stageRef, containerRef);
 
   // Combined useEffect for Initialization and Log Status
-  useEffect(() => {
-    const fetchAndCheck = async () => {
-      const cachedSores = JSON.parse(
-        localStorage.getItem('activesores') || '[]'
-      );
-      setSores(cachedSores); // Set sores from cache
-      setSelectedSore(cachedSores[0]);
+  // useEffect(() => {
+  //   const fetchAndCheck = async () => {
+  //     const cachedSores = JSON.parse(
+  //       localStorage.getItem('activesores') || '[]'
+  //     );
+  //     setSores(cachedSores); // Set sores from cache
+  //     setSelectedSore(cachedSores[0]);
 
-      const activeSores = await loadSores('activesores');
-      setSores(activeSores);
-      localStorage.setItem('activesores', JSON.stringify(activeSores));
+  //     const activeSores = await loadSores('activesores');
+  //     setSores(activeSores);
+  //     localStorage.setItem('activesores', JSON.stringify(activeSores));
 
-      if (activeSores[0]) {
-        const result = checkDailyLogStatus(activeSores[0].updated);
-        console.log(result);
-        setLogCompleted(result);
+  //     if (activeSores[0]) {
+  //       const result = checkDailyLogStatus(activeSores[0].updated);
+  //       console.log(result);
+  //       setLogCompleted(result);
 
-        if (!result && activeSores.length) {
-          setMode('update');
-          const updatedSores = activeSores.map((sore) => ({
-            ...sore,
-            ...(sore.updated.includes(today)
-              ? {}
-              : {
-                  size: [...sore.size, sore.size.at(-1) ?? 5],
-                  pain: [...sore.pain, sore.pain.at(-1) ?? 5],
-                  updated: [...sore.updated, today],
-                }),
-          }));
-          setSores(updatedSores);
-          localStorage.setItem('activesores', JSON.stringify(updatedSores));
-          setSelectedSore(updatedSores[0]);
-        }
-      }
-    };
-    fetchAndCheck();
+  //       if (!result && activeSores.length) {
+  //         setMode('update');
+  //         const updatedSores = activeSores.map((sore) => ({
+  //           ...sore,
+  //           ...(sore.updated.includes(today)
+  //             ? {}
+  //             : {
+  //                 size: [...sore.size, sore.size.at(-1) ?? 5],
+  //                 pain: [...sore.pain, sore.pain.at(-1) ?? 5],
+  //                 updated: [...sore.updated, today],
+  //               }),
+  //         }));
+  //         setSores(updatedSores);
+  //         localStorage.setItem('activesores', JSON.stringify(updatedSores));
+  //         setSelectedSore(updatedSores[0]);
+  //       }
+  //     }
+  //   };
+  //   fetchAndCheck();
 
-    // ... (resize and touchmove handlers remain the same)
-  }, [setSores, setSelectedSore, setMode, today]);
+  // }, [setSores, setSelectedSore, setMode, today]);
 
-  useEffect(() => {
-    const handleResize = () => {
-      if (stageRef.current) {
-        stageRef.current.width(containerRef.current?.clientWidth || 0);
-        stageRef.current.height(containerRef.current?.clientHeight || 0);
-      }
-    };
+  // useEffect(() => {
+  //   const handleResize = () => {
+  //     if (stageRef.current) {
+  //       stageRef.current.width(containerRef.current?.clientWidth || 0);
+  //       stageRef.current.height(containerRef.current?.clientHeight || 0);
+  //     }
+  //   };
 
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  //   window.addEventListener('resize', handleResize);
+  //   return () => window.removeEventListener('resize', handleResize);
+  // }, []);
 
-  useEffect(() => {
-    const handleTouchMove = (e: TouchEvent) => {
-      if (e.touches.length > 1) {
-        e.preventDefault();
-      }
-    };
+  // useEffect(() => {
+  //   const handleTouchMove = (e: TouchEvent) => {
+  //     if (e.touches.length > 1) {
+  //       e.preventDefault();
+  //     }
+  //   };
 
-    const stage = stageRef.current;
-    if (stage) {
-      stage.on('touchmove', handleTouchMove);
-    }
+  //   const stage = stageRef.current;
+  //   if (stage) {
+  //     stage.on('touchmove', handleTouchMove);
+  //   }
 
-    return () => {
-      if (stage) {
-        stage.off('touchmove', handleTouchMove);
-      }
-    };
-  }, []);
+  //   return () => {
+  //     if (stage) {
+  //       stage.off('touchmove', handleTouchMove);
+  //     }
+  //   };
+  // }, []);
 
   const handleDragLabelCoordination = (
     e: React.MouseEvent<HTMLGroupElement>
@@ -133,7 +137,7 @@ const ImagePoint: React.FC = ({
     }
   };
 
-  const handleClickLabel = (e: React.MouseEvent<HTMLGroupElement>) => {
+  const handleClickLabel = (e: any) => {
     const id = e.target.id() || e.target.findAncestor('Group')?.attrs.id;
     setSelectedSore(sores.find((sore) => sore.id === id));
   };
@@ -173,10 +177,10 @@ const ImagePoint: React.FC = ({
   };
 
   const handleCancel = () => {
-    handleResetZoom(stageRef);
-    setMode('view');
-    setSores(originalSores);
+    setSores(originalSores.current);
     setSelectedSore(null);
+    setMode('view');
+    handleResetZoom(stageRef);
   };
 
   const handleFinishAdd = async () => {
@@ -316,22 +320,27 @@ const ImagePoint: React.FC = ({
           label={isGums ? 'Mouth' : 'Gums'}
         />
       </div>
+      {/* <div className="absolute bottom-20 left-0 z-20 flex w-full flex-row">
+        {mode !== 'view' && selectedSore && (
+          <SoreSliders sore={selectedSore} mode={mode} />
+        )}
+      </div> */}
       <div className="absolute bottom-0 left-1/2 z-20 flex -translate-x-1/2 transform flex-row justify-center gap-2">
         {mode === 'view' && (
           <>
             <ImagePlotButton
               onClick={() => {
-                setMode('add');
+                originalSores.current = sores;
                 setSelectedSore(null);
-                setOriginalSores(sores);
+                setMode('add');
               }}
               label="Add"
             />
             {sores.length > 0 && selectedSore && (
               <ImagePlotButton
                 onClick={() => {
+                  originalSores.current = sores;
                   setMode('edit');
-                  setOriginalSores(sores);
                 }}
                 label="Edit"
               />

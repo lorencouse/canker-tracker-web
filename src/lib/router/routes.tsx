@@ -2,6 +2,7 @@ import React from 'react';
 import type { PathRouteProps } from 'react-router-dom';
 
 import DailyLogView from '../pages/dailyLog';
+import LandingPage from '../pages/landingPage';
 import SignInPage from '../pages/SignInPage';
 import SettingsPage from '@/components/userDashboard/settingsPage';
 
@@ -23,6 +24,10 @@ export const routes: Array<PathRouteProps> = [
   {
     path: '/daily-log',
     element: <DailyLogView />,
+  },
+  {
+    path: '/get-started',
+    element: <LandingPage />,
   },
 ];
 

@@ -55,35 +55,31 @@ const SoreSliders: React.FC = () => {
   }, [selectedSore]);
 
   return (
-    <div>
-      {selectedSore && (
-        <div className="sliders text-left text-xl">
-          <div className="slider-container">
-            <p className="my-4">
-              <span className="font-bold">Size:</span>{' '}
-              {soreSize[soreSize.length - 1]}
-            </p>
-            <Slider
-              min={1}
-              max={20}
-              value={[soreSize[soreSize.length - 1]]}
-              onValueChange={handleSizeChange}
-            />
-          </div>
-          <div className="slider-container my-10">
-            <p className="my-4">
-              <span className="font-bold">Pain:</span>{' '}
-              {painLevel[painLevel.length - 1]}
-            </p>
-            <Slider
-              min={1}
-              max={10}
-              value={[painLevel[painLevel.length - 1]]}
-              onValueChange={handlePainChange}
-            />
-          </div>
-        </div>
-      )}
+    <div className="sliders text-left text-xl">
+      <div className="slider-container">
+        <p className="my-4">
+          <span className="font-bold">Size:</span>{' '}
+          {soreSize[soreSize.length - 1]}
+        </p>
+        <Slider
+          min={1}
+          max={20}
+          value={[soreSize[soreSize.length - 1]]}
+          onValueChange={handleSizeChange}
+        />
+      </div>
+      <div className="slider-container my-10">
+        <p className="my-4">
+          <span className="font-bold">Pain:</span>{' '}
+          {painLevel[painLevel.length - 1]}
+        </p>
+        <Slider
+          min={1}
+          max={10}
+          value={[painLevel[painLevel.length - 1]]}
+          onValueChange={handlePainChange}
+        />
+      </div>
     </div>
   );
 };

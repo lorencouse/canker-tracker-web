@@ -29,14 +29,14 @@ export default function Header() {
     <header className="flex h-20 w-full items-center justify-between px-4 md:px-6">
       <div className="flex items-center">
         <Link to="/" className="flex h-14 w-14" prefetch="false">
-          <img src="/assets/images/logo-100.png" alt="Canker Tracker" />
+          <img src="/assets/images/logo.png" alt="Canker Tracker" />
           <span className="sr-only">Canker Tracker</span>
         </Link>
 
         <NavigationMenu className="ml-6 hidden lg:flex">
           <NavigationMenuList className="ml-4 flex gap-8">
             <NavigationMenuLink asChild>
-              <Link to="/" className="nav-link" prefetch="false">
+              <Link to="/get-started" className="nav-link" prefetch="false">
                 Home
               </Link>
             </NavigationMenuLink>
